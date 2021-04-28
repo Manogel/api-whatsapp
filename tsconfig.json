@@ -1,15 +1,23 @@
 {
   "compilerOptions": {
+    "target": "es2017",
     "module": "commonjs",
-    "declaration": true,
+    "lib": ["ES6"],
+    "allowJs": true,
     "removeComments": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "es2017",
-    "sourceMap": true,
+    "rootDir": ".",
     "outDir": "./dist",
     "baseUrl": "./",
-    "incremental": true
-  }
+    "paths": {
+      "@config/*": ["src/config/*"],
+      "@utils/*": ["src/utils/*"],
+      "@providers/*": ["src/providers/*"],
+      "@modules/*": ["src/modules/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
 }

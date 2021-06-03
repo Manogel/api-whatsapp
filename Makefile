@@ -1,9 +1,3 @@
-start: 
-	@echo "#######################"
-	@echo "# Hot Reload application #"
-	@echo "#######################"
-	npx ts-node-dev -r tsconfig-paths/register --respawn --exit-child --ignore-watch node_modules src/main.ts
-
 remove:
 	@echo "#######################"
 	@echo "# Running application #"

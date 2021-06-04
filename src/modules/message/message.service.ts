@@ -24,18 +24,14 @@ export class MessageService {
       const extension = originalname.slice(
         ((originalname.lastIndexOf('.') - 1) >>> 0) + 2,
       );
-      console.log(extension, 's');
       switch (extension) {
         case 'mp3':
-          console.log('é mp3');
           this.whatsappService.sendVoiceMessage(formatted);
           break;
         case 'mp4':
-          console.log('é mp4');
           this.whatsappService.sendVideoAsGifMessage(formatted);
           break;
         case 'jpg':
-          console.log('é jpg');
           this.whatsappService.sendImageMessage(formatted);
           break;
         default:

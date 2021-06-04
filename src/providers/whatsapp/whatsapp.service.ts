@@ -25,7 +25,6 @@ export class WhatsappService {
       .then((client) => {
         this.client = client;
         //this.socketGateway.broadcast('init', 'Sessão Criada');
-        console.log('client');
         process.on('SIGINT', function () {
           client.close();
         });
@@ -40,7 +39,6 @@ export class WhatsappService {
       EventTypes.QRCODE,
       'Aguardando leitura do QRCode',
     );
-    console.log('qrCode');
   };
 
   async listenOnMessage() {
@@ -49,8 +47,6 @@ export class WhatsappService {
 
   onMessage(message: Message) {
     // this.socketGateway.broadcast('newMsg', message);
-    console.log('received message');
-    console.log(message);
   }
 
   async sendTextMessage(data: SendMessageTextDto) {

@@ -7,12 +7,12 @@ class SendMessageDto {
 
 export class SendMessageTextDto extends SendMessageDto {
   @IsString()
-  message: string;
+  message: Express.Multer.File | string;
 }
 
 export class SendMessageFileDto extends SendMessageDto {
   @IsString()
-  base64: string;
+  path: string;
 
   @IsString()
   filename: string;

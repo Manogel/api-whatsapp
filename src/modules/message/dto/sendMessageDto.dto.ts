@@ -1,4 +1,9 @@
+import { IsString, IsNotEmpty } from 'class-validator';
+
 export class SendMessageDto {
+  @IsString()
   to: string;
-  message: string | Record<string, any>;
+
+  @IsNotEmpty()
+  message: Express.Multer.File | string;
 }

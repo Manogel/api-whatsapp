@@ -6,7 +6,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { MessageService } from './message.service';
-import { SendMessageFileDto } from './dto/send-message-file.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import uploadConfig from '@config/upload';
 import { SendMessageRequestDto } from './dto/SendMessageRequestDto';
@@ -23,22 +22,11 @@ export class MessageController {
   )
   async sendMessage(
     @Body() body: SendMessageRequestDto,
-    @UploadedFile() file?: any,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
-    // console.log(file);
-    // console.log(body);
-
     this.messageService.sendMessage({
       to: body.to,
       message: file || body.message,
     });
-  }
-  @Post('/file')
-  async sendMessageFile(
-    @Body()
-    sendMessageFileDto: SendMessageFileDto,
-  ) {
-    console.log('rrrrrr');
-    this.messageService.sendMessageFile(sendMessageFileDto);
   }
 }

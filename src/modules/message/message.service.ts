@@ -22,28 +22,28 @@ export class MessageService {
 
     //const { message } = sendMessageTextDto;
     const teste = Buffer.from(base64, 'base64');
-    (async () => {
-      const result = await filetype.fromBuffer(teste);
-      //console.log(result);
+    // (async () => {
+    //   const result = await filetype.fromBuffer(teste);
+    //   //console.log(result);
 
-      const extension = base64.split('/', mime.lookup(base64))[1];
-      console.log(extension, 'dd');
-      switch (result.ext) {
-        case 'mp3':
-          console.log('é mp3');
-          this.whatsappService.sendVoiceMessage(sendMessageFileDto);
-          break;
-        case 'mp4':
-          console.log('é mp4');
-          this.whatsappService.sendVideoMessage(sendMessageFileDto);
-          break;
-        case 'jpg':
-          console.log('é jpg');
-          this.whatsappService.sendImageMessage(sendMessageFileDto);
-          break;
-        default:
-          break;
-      }
-    })();
+    //   const extension = base64.split('/', mime.lookup(base64))[1];
+    //   console.log(extension, 'dd');
+    //   switch (result.ext) {
+    //     case 'mp3':
+    //       console.log('é mp3');
+    //       this.whatsappService.sendVoiceMessage(sendMessageFileDto);
+    //       break;
+    //     case 'mp4':
+    //       console.log('é mp4');
+    //       this.whatsappService.sendVideoMessage(sendMessageFileDto);
+    //       break;
+    //     case 'jpg':
+    //       console.log('é jpg');
+    //       this.whatsappService.sendImageMessage(sendMessageFileDto);
+    //       break;
+    //     default:
+    //       break;
+    //   }
+    // })();
   }
 }

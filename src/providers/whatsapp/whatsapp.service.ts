@@ -8,7 +8,7 @@ import {
   SendMessageImageDto,
   SendMessageVoiceDto,
 } from './dtos/SendMessageDto';
-import { SocketGateway } from '../socketio/socketio.gateway';
+import { EventTypes, SocketGateway } from '../socketio/socketio.gateway';
 
 @Injectable()
 export class WhatsappService {
@@ -33,7 +33,10 @@ export class WhatsappService {
   }
 
   onWaitQrCode: CatchQR = (qrCode) => {
-    this.socketGateway.broadcast('qrCode', 'Aguardando leitura do QRCode');
+    this.socketGateway.broadcast(
+      EventTypes.QRCODE,
+      'Aguardando leitura do QRCode',
+    );
     console.log('qrCode');
   };
 

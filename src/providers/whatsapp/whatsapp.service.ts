@@ -45,7 +45,7 @@ export class WhatsappService {
   }
 
   onMessage(message: Message) {
-    this.socketGateway.broadcast('newMsg', message);
+    // this.socketGateway.broadcast('newMsg', message);
     console.log('received message');
     console.log(message);
   }

@@ -11,8 +11,12 @@ const uploadConfig = {
     storage: diskStorage({
       destination: tmpFolder,
       filename(_req, _file, cb) {
+        console.log(_file, 'ddddd', _req);
         const filehash = crypto.randomBytes(10).toString('hex');
-        const filename = `${filehash}-${Date.now()}.png`;
+        const fname = _file.originalname;
+        const filename = `${filehash}-${Date.now()}.${fname.slice(
+          ((fname.lastIndexOf('.') - 1) >>> 0) + 2,
+        )}`;
 
         return cb(null, filename);
       },

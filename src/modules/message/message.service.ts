@@ -28,6 +28,7 @@ export class MessageService {
 
   async sendMessageFile(sendMessageFileDto: SendMessageFileDto) {
     //console.log(sendMessageFileDto, 'sdsd');
+    console.log('dd', sendMessageFileDto);
     const { base64 } = sendMessageFileDto;
     //console.log(base64);
 

@@ -11,7 +11,6 @@ const uploadConfig = {
     storage: diskStorage({
       destination: tmpFolder,
       filename(_req, _file, cb) {
-        console.log(_file, 'ddddd', _req);
         const filehash = crypto.randomBytes(10).toString('hex');
         const fname = _file.originalname;
         const filename = `${filehash}-${Date.now()}.${fname.slice(

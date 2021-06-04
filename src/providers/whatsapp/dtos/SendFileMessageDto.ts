@@ -5,8 +5,8 @@ export class SendFileMessageDto {
   to: string;
 
   @IsString()
-  base64: string;
+  base64?: string;
 
   @IsString()
-  filename: string;
+  filename?: string;
 }

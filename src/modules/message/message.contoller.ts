@@ -1,7 +1,15 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { MessageService } from './message.service';
-import { SendMessageTextDto } from './dto/send-message-text.dto';
-import { SendMessageFileDto } from './dto/send-message-file.dto';
+import { SendMessageTextDto } from './dto/sendMessageText.dto';
+import { SendMessageFileDto } from './dto/sendMessageFile.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
 
 @Controller('messages')
 export class MessageController {
@@ -12,12 +20,14 @@ export class MessageController {
     console.log('rrrrrr');
     this.messageService.sendMessageText(sendMessageTextDto);
   }
+  @UseInterceptors(FileInterceptor('file'))
   @Post('/file')
   async sendMessageFile(
     @Body()
     sendMessageFileDto: SendMessageFileDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
     console.log('rrrrrr');
-    this.messageService.sendMessageFile(sendMessageFileDto);
+    this.messageService.sendMessageFile(sendMessageFileDto, file);
   }
 }

@@ -3,5 +3,6 @@ import { WhatsappService } from './whatsapp.service';
 
 @Module({
   providers: [WhatsappService],
+  exports: [WhatsappService],
 })
 export class WhatsappModule {}

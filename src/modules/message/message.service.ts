@@ -1,15 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { WhatsappService } from '../../providers/whatsapp/whatsapp.service';
-import { SendMessageTextDto } from './dto/send-message-text.dto';
 import { SendMessageFileDto } from './dto/send-message-file.dto';
 import * as mime from 'mime-types';
 import * as filetype from 'file-type';
+import { SendMessageDto } from './dto/sendMessageDto.dto';
 
 @Injectable()
 export class MessageService {
   constructor(private readonly whatsappService: WhatsappService) {}
 
-  async sendMessageText(sendMessageTextDto: SendMessageTextDto) {
+  async sendMessage(data: SendMessageDto) {
+    const { to, message } = data;
+    console.log(message);
+
+    const isFile = typeof message !== 'string';
+
+    console.log(`É um arquivo? ${isFile}`);
+
+    // this.whatsappService.sendTextMessage(sendMessageTextDto);
+  }
+
+  async sendMessageText(sendMessageTextDto: any) {
     console.log('mensagem');
 
     this.whatsappService.sendTextMessage(sendMessageTextDto);

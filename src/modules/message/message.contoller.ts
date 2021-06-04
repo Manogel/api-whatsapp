@@ -1,16 +1,37 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { MessageService } from './message.service';
-import { SendMessageTextDto } from './dto/send-message-text.dto';
 import { SendMessageFileDto } from './dto/send-message-file.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import uploadConfig from '@config/upload';
+import { SendMessageRequestDto } from './dto/SendMessageRequestDto';
 
 @Controller('messages')
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
-  @Post('/text')
-  async sendMessageText(@Body() sendMessageTextDto: SendMessageTextDto) {
-    console.log('rrrrrr');
-    this.messageService.sendMessageText(sendMessageTextDto);
+  @Post()
+  @UseInterceptors(
+    FileInterceptor('message', {
+      storage: uploadConfig.multer.storage,
+    }),
+  )
+  async sendMessage(
+    @Body() body: SendMessageRequestDto,
+    @UploadedFile() file?: any,
+  ) {
+    // console.log(file);
+    // console.log(body);
+
+    this.messageService.sendMessage({
+      to: body.to,
+      message: file || body.message,
+    });
   }
   @Post('/file')
   async sendMessageFile(

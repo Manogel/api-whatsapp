@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { WhatsappService } from '../../providers/whatsapp/whatsapp.service';
 import { SendMessageFileDto } from './dto/sendMesasageFile.dto';
 import { SendMessageDto } from './dto/sendMessageDto.dto';
+import { SendMessageRequestDto } from './dto/SendMessageRequestDto';
 
 @Injectable()
 export class MessageService {
@@ -14,31 +15,35 @@ export class MessageService {
 
     if (isFile) {
       const messageToFile = message as Express.Multer.File;
-      const originalname = messageToFile.originalname;
-      const formatted: SendMessageFileDto = {
+      const type = messageToFile.mimetype;
+      const formattedFile: SendMessageFileDto = {
         path: messageToFile.path,
         to: to,
         filename: messageToFile.filename,
         subtitle: messageToFile.filename,
       };
-      const extension = originalname.slice(
-        ((originalname.lastIndexOf('.') - 1) >>> 0) + 2,
-      );
-      switch (extension) {
-        case 'mp3':
-          this.whatsappService.sendVoiceMessage(formatted);
+
+      const generalType = type.split('/').shift();
+
+      switch (generalType) {
+        case 'audio':
+          await this.whatsappService.sendVoiceMessage(formattedFile);
           break;
-        case 'mp4':
-          this.whatsappService.sendVideoAsGifMessage(formatted);
+        case 'video':
+          await this.whatsappService.sendVideoAsGifMessage(formattedFile);
           break;
-        case 'jpg':
-          this.whatsappService.sendImageMessage(formatted);
+        case 'image':
+          await this.whatsappService.sendImageMessage(formattedFile);
           break;
         default:
           break;
       }
     } else {
-      this.whatsappService.sendTextMessage(data);
+      const formattedMessage: SendMessageRequestDto = {
+        message: message as string,
+        to: to,
+      };
+      await this.whatsappService.sendTextMessage(formattedMessage);
     }
   }
 }

@@ -8,7 +8,9 @@ import {
   SendMessageImageDto,
   SendMessageVoiceDto,
 } from './dtos/SendMessageDto';
-import { EventTypes, SocketGateway } from '../socketio/socketio.gateway';
+import { SocketGateway } from '../socketio/socketio.gateway';
+import { EventTypes } from '../socketio/dto/eventType.dto';
+import { DefaultMessages } from '../socketio/dto/defaultMessages.dto';
 
 @Injectable()
 export class WhatsappService {
@@ -24,7 +26,7 @@ export class WhatsappService {
     })
       .then((client) => {
         this.client = client;
-        //this.socketGateway.broadcast('init', 'Sessão Criada');
+
         process.on('SIGINT', function () {
           client.close();
         });
@@ -35,31 +37,32 @@ export class WhatsappService {
   }
 
   onWaitQrCode: CatchQR = (qrCode) => {
-    this.socketGateway.broadcast(
-      EventTypes.QRCODE,
-      'Aguardando leitura do QRCode',
-    );
+    this.socketGateway.broadcast(EventTypes.QR_CODE, qrCode);
   };
 
+  async listenOnConnection() {
+    if (await this.client.isConnected()) {
+      this.onConnection();
+    }
+  }
+
+  onConnection() {
+    this.socketGateway.broadcast(
+      EventTypes.CONNECTION_STATUS,
+      DefaultMessages.CONNECT,
+    );
+  }
   async listenOnMessage() {
     await this.client.onMessage(this.onMessage);
   }
 
   onMessage(message: Message) {
-    // this.socketGateway.broadcast('newMsg', message);
+    this.socketGateway.broadcast(EventTypes.NEW_MSG, message);
   }
 
   async sendTextMessage(data: SendMessageTextDto) {
     const { to, message } = data;
-    console.log('et', to, message);
-    const response = await this.client
-      .sendText(to, message as string)
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const response = await this.client.sendText(to, message as string);
 
     return response;
   }

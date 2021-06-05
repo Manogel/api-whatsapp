@@ -12,10 +12,8 @@ const uploadConfig = {
       destination: tmpFolder,
       filename(_req, _file, cb) {
         const filehash = crypto.randomBytes(10).toString('hex');
-        const fname = _file.originalname;
-        const filename = `${filehash}-${Date.now()}.${fname.slice(
-          ((fname.lastIndexOf('.') - 1) >>> 0) + 2,
-        )}`;
+        const ext = _file.originalname.split('.').pop();
+        const filename = `${filehash}-${Date.now()}.${ext}`;
 
         return cb(null, filename);
       },

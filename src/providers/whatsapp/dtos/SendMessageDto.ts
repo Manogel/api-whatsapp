@@ -7,7 +7,7 @@ class SendMessageDto {
 
 export class SendMessageTextDto extends SendMessageDto {
   @IsString()
-  message: Express.Multer.File | string;
+  message: string;
 }
 
 export class SendMessageFileDto extends SendMessageDto {

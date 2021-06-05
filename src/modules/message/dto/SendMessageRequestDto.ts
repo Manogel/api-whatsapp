@@ -7,7 +7,7 @@ export class SendMessageRequestDto {
 
   @IsOptional()
   @IsString()
-  subtitle: string;
+  subtitle?: string;
 
   @IsNotEmpty()
   message: Express.Multer.File | string;

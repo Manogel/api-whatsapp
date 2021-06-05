@@ -14,13 +14,14 @@ export class MessageService {
     const isFile = typeof message !== 'string';
 
     if (isFile) {
+      const { subtitle } = data;
       const messageToFile = message as Express.Multer.File;
       const type = messageToFile.mimetype;
       const formattedFile: SendMessageFileDto = {
         path: messageToFile.path,
         to: to,
         filename: messageToFile.filename,
-        subtitle: messageToFile.filename,
+        subtitle: subtitle,
       };
 
       const generalType = type.split('/').shift();

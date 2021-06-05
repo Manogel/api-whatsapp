@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class SendMessageFileDto {
   @IsNotEmpty()
@@ -13,6 +13,7 @@ export class SendMessageFileDto {
   @IsString()
   filename: string;
 
+  @IsOptional()
   @IsString()
-  subtitle: string;
+  subtitle?: string = '';
 }

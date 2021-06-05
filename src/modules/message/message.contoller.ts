@@ -26,6 +26,7 @@ export class MessageController {
   ) {
     this.messageService.sendMessage({
       to: body.to,
+      subtitle: body.subtitle,
       message: file || body.message,
     });
   }

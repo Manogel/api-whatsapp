@@ -67,7 +67,7 @@ export class WhatsappService {
     return response;
   }
 
-  async sendVideoAsGifMessage(data: SendMessageVideoAsGifDto) {
+  async sendVideoMessage(data: SendMessageVideoAsGifDto) {
     const { to, path, filename, subtitle } = data;
     const response = await this.client.sendVideoAsGif(
       to,

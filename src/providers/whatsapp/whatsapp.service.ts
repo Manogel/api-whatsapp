@@ -50,7 +50,7 @@ export class WhatsappService {
   }
 
   onMessage(message: Message) {
-    this.socketGateway.broadcast(EventTypes.NEW_MSG, message);
+    this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, message);
   }
 
   async sendTextMessage(data: SendMessageTextDto) {

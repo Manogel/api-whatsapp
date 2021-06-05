@@ -29,7 +29,7 @@ export class MessageService {
           await this.whatsappService.sendVoiceMessage(formattedFile);
           break;
         case 'video':
-          await this.whatsappService.sendVideoAsGifMessage(formattedFile);
+          await this.whatsappService.sendFileDocument(formattedFile);
           break;
         case 'image':
           await this.whatsappService.sendImageMessage(formattedFile);

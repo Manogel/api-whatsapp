@@ -1,16 +1,16 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 
 export class SendMessageFileDto {
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   to: string;
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   path: string;
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   filename: string;
 
   @IsString()

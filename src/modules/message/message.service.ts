@@ -8,7 +8,7 @@ import { SendMessageRequestDto } from './dto/SendMessageRequestDto';
 export class MessageService {
   constructor(private readonly whatsappService: WhatsappService) {}
 
-  async sendMessage(data: SendMessageDto) {
+  async sendMessage(data: SendMessageRequestDto) {
     const { to, message } = data;
 
     const isFile = typeof message !== 'string';
@@ -24,7 +24,6 @@ export class MessageService {
       };
 
       const generalType = type.split('/').shift();
-
       switch (generalType) {
         case 'audio':
           await this.whatsappService.sendVoiceMessage(formattedFile);
@@ -35,11 +34,14 @@ export class MessageService {
         case 'image':
           await this.whatsappService.sendImageMessage(formattedFile);
           break;
+        case 'application':
+          await this.whatsappService.sendFileDocument(formattedFile);
+          break;
         default:
           break;
       }
     } else {
-      const formattedMessage: SendMessageRequestDto = {
+      const formattedMessage: SendMessageDto = {
         message: message as string,
         to: to,
       };

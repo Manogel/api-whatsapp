@@ -1,16 +1,16 @@
 import { getAsyncAppConfig } from '@config/app';
 import { Injectable } from '@nestjs/common';
-import { Whatsapp, create, CatchQR, Message } from 'venom-bot';
+import { Whatsapp, create, CatchQR, Message, StatusFind } from 'venom-bot';
 import {
   SendMessageVideoAsGifDto,
   SendMessageFileDto,
   SendMessageTextDto,
   SendMessageImageDto,
   SendMessageVoiceDto,
+  SendFileDocumentDto,
 } from './dtos/SendMessageDto';
 import { SocketGateway } from '../socketio/socketio.gateway';
 import { EventTypes } from '../socketio/dto/eventType.dto';
-import { DefaultMessages } from '../socketio/dto/defaultMessages.dto';
 
 @Injectable()
 export class WhatsappService {
@@ -23,6 +23,7 @@ export class WhatsappService {
       session: appConfig.appname,
       logQR: true,
       catchQR: this.onWaitQrCode,
+      statusFind: this.onGetStatus,
     })
       .then((client) => {
         this.client = client;
@@ -40,18 +41,10 @@ export class WhatsappService {
     this.socketGateway.broadcast(EventTypes.QR_CODE, qrCode);
   };
 
-  async listenOnConnection() {
-    if (await this.client.isConnected()) {
-      this.onConnection();
-    }
-  }
+  onGetStatus: StatusFind = (statusGet) => {
+    this.socketGateway.broadcast(EventTypes.CONNECTION_STATUS, statusGet);
+  };
 
-  onConnection() {
-    this.socketGateway.broadcast(
-      EventTypes.CONNECTION_STATUS,
-      DefaultMessages.CONNECT,
-    );
-  }
   async listenOnMessage() {
     await this.client.onMessage(this.onMessage);
   }
@@ -96,6 +89,13 @@ export class WhatsappService {
   async sendVoiceMessage(data: SendMessageVoiceDto) {
     const { to, path } = data;
     const response = await this.client.sendVoice(to, path);
+
+    return response;
+  }
+
+  async sendFileDocument(data: SendFileDocumentDto) {
+    const { to, path, filename, subtitle } = data;
+    const response = await this.client.sendFile(to, path, filename, subtitle);
 
     return response;
   }

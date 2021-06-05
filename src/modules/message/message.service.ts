@@ -1,60 +1,52 @@
 import { Injectable } from '@nestjs/common';
 import { WhatsappService } from '../../providers/whatsapp/whatsapp.service';
-import { SendMessageFileDto } from './dto/send-message-file.dto';
-import * as mime from 'mime-types';
-import * as filetype from 'file-type';
+import { SendMessageFileDto } from './dto/sendMesasageFile.dto';
 import { SendMessageDto } from './dto/sendMessageDto.dto';
+import { SendMessageRequestDto } from './dto/SendMessageRequestDto';
 
 @Injectable()
 export class MessageService {
   constructor(private readonly whatsappService: WhatsappService) {}
 
-  async sendMessage(data: SendMessageDto) {
+  async sendMessage(data: SendMessageRequestDto) {
     const { to, message } = data;
-    console.log(message);
 
     const isFile = typeof message !== 'string';
 
-    console.log(`É um arquivo? ${isFile}`);
+    if (isFile) {
+      const { subtitle } = data;
+      const messageToFile = message as Express.Multer.File;
+      const type = messageToFile.mimetype;
+      const formattedFile: SendMessageFileDto = {
+        path: messageToFile.path,
+        to: to,
+        filename: messageToFile.filename,
+        subtitle: subtitle,
+      };
 
-    // this.whatsappService.sendTextMessage(sendMessageTextDto);
-  }
-
-  async sendMessageText(sendMessageTextDto: any) {
-    console.log('mensagem');
-
-    this.whatsappService.sendTextMessage(sendMessageTextDto);
-  }
-
-  async sendMessageFile(sendMessageFileDto: SendMessageFileDto) {
-    //console.log(sendMessageFileDto, 'sdsd');
-    const { base64 } = sendMessageFileDto;
-    //console.log(base64);
-
-    //const { message } = sendMessageTextDto;
-    const teste = Buffer.from(base64, 'base64');
-    // (async () => {
-    //   const result = await filetype.fromBuffer(teste);
-    //   //console.log(result);
-
-    //   const extension = base64.split('/', mime.lookup(base64))[1];
-    //   console.log(extension, 'dd');
-    //   switch (result.ext) {
-    //     case 'mp3':
-    //       console.log('é mp3');
-    //       this.whatsappService.sendVoiceMessage(sendMessageFileDto);
-    //       break;
-    //     case 'mp4':
-    //       console.log('é mp4');
-    //       this.whatsappService.sendVideoMessage(sendMessageFileDto);
-    //       break;
-    //     case 'jpg':
-    //       console.log('é jpg');
-    //       this.whatsappService.sendImageMessage(sendMessageFileDto);
-    //       break;
-    //     default:
-    //       break;
-    //   }
-    // })();
+      const generalType = type.split('/').shift();
+      switch (generalType) {
+        case 'audio':
+          await this.whatsappService.sendVoiceMessage(formattedFile);
+          break;
+        case 'video':
+          await this.whatsappService.sendFileDocument(formattedFile);
+          break;
+        case 'image':
+          await this.whatsappService.sendImageMessage(formattedFile);
+          break;
+        case 'application':
+          await this.whatsappService.sendFileDocument(formattedFile);
+          break;
+        default:
+          break;
+      }
+    } else {
+      const formattedMessage: SendMessageDto = {
+        message: message as string,
+        to: to,
+      };
+      await this.whatsappService.sendTextMessage(formattedMessage);
+    }
   }
 }

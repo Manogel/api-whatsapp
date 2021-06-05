@@ -1,14 +1,16 @@
 import { getAsyncAppConfig } from '@config/app';
 import { Injectable } from '@nestjs/common';
-import { Whatsapp, create, CatchQR, Message } from 'venom-bot';
+import { Whatsapp, create, CatchQR, Message, StatusFind } from 'venom-bot';
 import {
   SendMessageVideoAsGifDto,
   SendMessageFileDto,
   SendMessageTextDto,
   SendMessageImageDto,
   SendMessageVoiceDto,
+  SendFileDocumentDto,
 } from './dtos/SendMessageDto';
-import { EventTypes, SocketGateway } from '../socketio/socketio.gateway';
+import { SocketGateway } from '../socketio/socketio.gateway';
+import { EventTypes } from '../socketio/dto/eventType.dto';
 
 @Injectable()
 export class WhatsappService {
@@ -17,27 +19,30 @@ export class WhatsappService {
   constructor(private readonly socketGateway: SocketGateway) {
     const appConfig = getAsyncAppConfig();
 
-    // create({
-    //   session: appConfig.appname,
-    //   logQR: false,
-    //   catchQR: this.onWaitQrCode,
-    // })
-    //   .then((client) => {
-    //     this.client = client;
-    //     this.socketGateway.broadcast('init', 'Sessão Criada');
-    //     console.log('client');
-    //   })
-    //   .catch(() => {
-    //     console.log('Erro ao criar instancia do whatsapp');
-    //   });
+    create({
+      session: appConfig.appname,
+      logQR: true,
+      catchQR: this.onWaitQrCode,
+      statusFind: this.onGetStatus,
+    })
+      .then((client) => {
+        this.client = client;
+
+        process.on('SIGINT', function () {
+          client.close();
+        });
+      })
+      .catch(() => {
+        console.log('Erro ao criar instancia do whatsapp');
+      });
   }
 
   onWaitQrCode: CatchQR = (qrCode) => {
-    this.socketGateway.broadcast(
-      EventTypes.QRCODE,
-      'Aguardando leitura do QRCode',
-    );
-    console.log('qrCode');
+    this.socketGateway.broadcast(EventTypes.QR_CODE, qrCode);
+  };
+
+  onGetStatus: StatusFind = (statusGet) => {
+    this.socketGateway.broadcast(EventTypes.CONNECTION_STATUS, statusGet);
   };
 
   async listenOnMessage() {
@@ -45,31 +50,28 @@ export class WhatsappService {
   }
 
   onMessage(message: Message) {
-    this.socketGateway.broadcast('newMsg', message);
-    console.log('received message');
-    console.log(message);
+    this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, message);
   }
 
   async sendTextMessage(data: SendMessageTextDto) {
     const { to, message } = data;
-
-    const response = await this.client.sendText(to, message);
+    const response = await this.client.sendText(to, message as string);
 
     return response;
   }
 
   async sendFileMessage(data: SendMessageFileDto) {
-    const { to, base64, filename } = data;
-    const response = await this.client.sendFileFromBase64(to, base64, filename);
+    const { to, path, filename } = data;
+    const response = await this.client.sendFile(to, path, filename);
 
     return response;
   }
 
-  async sendVideoAsGifMessage(data: SendMessageVideoAsGifDto) {
-    const { to, base64, filename, subtitle } = data;
-    const response = await this.client.sendVideoAsGifFromBase64(
+  async sendVideoMessage(data: SendMessageVideoAsGifDto) {
+    const { to, path, filename, subtitle } = data;
+    const response = await this.client.sendVideoAsGif(
       to,
-      base64,
+      path,
       filename,
       subtitle,
     );
@@ -78,19 +80,22 @@ export class WhatsappService {
   }
 
   async sendImageMessage(data: SendMessageImageDto) {
-    const { to, base64, filename } = data;
-    const response = await this.client.sendImageFromBase64(
-      to,
-      base64,
-      filename,
-    );
+    const { to, path, filename } = data;
+    const response = await this.client.sendImage(to, path, filename);
 
     return response;
   }
 
   async sendVoiceMessage(data: SendMessageVoiceDto) {
-    const { to, base64 } = data;
-    const response = await this.client.sendVoiceBase64(to, base64);
+    const { to, path } = data;
+    const response = await this.client.sendVoice(to, path);
+
+    return response;
+  }
+
+  async sendFileDocument(data: SendFileDocumentDto) {
+    const { to, path, filename, subtitle } = data;
+    const response = await this.client.sendFile(to, path, filename, subtitle);
 
     return response;
   }

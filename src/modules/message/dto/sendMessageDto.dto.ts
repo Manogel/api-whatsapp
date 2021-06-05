@@ -1,4 +1,11 @@
+import { IsString, IsNotEmpty } from 'class-validator';
+
 export class SendMessageDto {
+  @IsNotEmpty()
+  @IsString()
   to: string;
-  message: string | Record<string, any>;
+
+  @IsNotEmpty()
+  @IsString()
+  message: string;
 }

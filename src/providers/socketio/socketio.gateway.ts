@@ -1,10 +1,6 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-
-export enum EventTypes {
-  QRCODE = 'qr-code',
-  NEW_MESSAGE = 'new-message',
-}
+import { EventTypes } from './dto/eventType.dto';
 
 @WebSocketGateway()
 export class SocketGateway {

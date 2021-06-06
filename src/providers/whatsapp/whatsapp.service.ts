@@ -1,13 +1,6 @@
 import { getAsyncAppConfig } from '@config/app';
 import { Injectable } from '@nestjs/common';
-import {
-  Whatsapp,
-  create,
-  CatchQR,
-  Message,
-  StatusFind,
-  Contact,
-} from 'venom-bot';
+import { Whatsapp, create, CatchQR, Message, StatusFind } from 'venom-bot';
 import {
   SendMessageVideoAsGifDto,
   SendMessageFileDto,
@@ -16,7 +9,6 @@ import {
   SendMessageVoiceDto,
   SendFileDocumentDto,
 } from './dtos/SendMessageDto';
-import { Contacts } from './dtos/Contacs.dto';
 import { SocketGateway } from '../socketio/socketio.gateway';
 import { EventTypes } from '../socketio/dto/eventType.dto';
 
@@ -112,9 +104,8 @@ export class WhatsappService {
     return response;
   }
 
-  async getContact(contact: Contacts) {
-    const { contactNumber } = contact;
-    const response = await this.client.getContact(contactNumber);
+  async getContact(contact: string) {
+    const response = await this.client.getContact(contact);
     return response;
   }
 }

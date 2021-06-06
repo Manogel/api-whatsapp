@@ -1,19 +1,18 @@
-import { Controller, Get, Param, Res } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ContactService } from './contact.service';
-import { Contacts } from './dto/contact.dto';
 
 @Controller('contacts')
 export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Get()
-  async getAllContacts(@Res() response) {
+  async getAllContacts() {
     const data = await this.contactService.getAllContacts();
-    return response.status(200).send(data);
+    return data;
   }
   @Get(':contactNumber')
-  async getContact(@Param() contact: Contacts, @Res() response) {
+  async getContact(@Param('contactNumber') contact: string) {
     const data = await this.contactService.getContact(contact);
-    return response.status(200).send(data);
+    return data;
   }
 }

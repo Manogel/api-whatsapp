@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Contacts } from './dto/contact.dto';
-import { WhatsappService } from '../../providers/whatsapp/whatsapp.service';
+import { WhatsappService } from '@providers/whatsapp/whatsapp.service';
 
 @Injectable()
 export class ContactService {
@@ -11,7 +10,7 @@ export class ContactService {
     return response;
   }
 
-  async getContact(contact: Contacts) {
+  async getContact(contact: string) {
     const response = await this.whatsAppService.getContact(contact);
     return response;
   }

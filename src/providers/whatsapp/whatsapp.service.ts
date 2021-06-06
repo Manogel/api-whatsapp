@@ -99,4 +99,13 @@ export class WhatsappService {
 
     return response;
   }
+  async getContactList() {
+    const contacts = await this.client.getAllContacts();
+    return contacts;
+  }
+
+  async getContact(phoneNumber: string) {
+    const contact = await this.client.getContact(phoneNumber);
+    return contact;
+  }
 }

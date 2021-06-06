@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { WhatsappModule } from './providers/whatsapp/whatsapp.module';
 import { SocketioModule } from './providers/socketio/socketio.module';
 import { MessageModule } from './modules/message/message.module';
+import { ContactModule } from './modules/contact/contact.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { MessageModule } from './modules/message/message.module';
     SocketioModule,
     WhatsappModule,
     MessageModule,
+    ContactModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -7,12 +7,12 @@ export class ContactController {
 
   @Get()
   async getAllContacts() {
-    const data = await this.contactService.getAllContacts();
-    return data;
+    const contacts = await this.contactService.getAllContacts();
+    return contacts;
   }
   @Get(':contactNumber')
-  async getContact(@Param('contactNumber') contact: string) {
-    const data = await this.contactService.getContact(contact);
-    return data;
+  async getContact(@Param('contactNumber') phoneNumber: string) {
+    const contact = await this.contactService.getContact(phoneNumber);
+    return contact;
   }
 }

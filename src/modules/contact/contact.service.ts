@@ -6,12 +6,12 @@ export class ContactService {
   constructor(private readonly whatsAppService: WhatsappService) {}
 
   async getAllContacts() {
-    const response = await this.whatsAppService.getContactList();
-    return response;
+    const contacts = await this.whatsAppService.getContactList();
+    return contacts;
   }
 
-  async getContact(contact: string) {
-    const response = await this.whatsAppService.getContact(contact);
-    return response;
+  async getContact(phoneNumber: string) {
+    const contact = await this.whatsAppService.getContact(phoneNumber);
+    return contact;
   }
 }

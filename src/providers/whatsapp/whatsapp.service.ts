@@ -100,12 +100,12 @@ export class WhatsappService {
     return response;
   }
   async getContactList() {
-    const response = await this.client.getAllContacts();
-    return response;
+    const contacts = await this.client.getAllContacts();
+    return contacts;
   }
 
-  async getContact(contact: string) {
-    const response = await this.client.getContact(contact);
-    return response;
+  async getContact(phoneNumber: string) {
+    const contact = await this.client.getContact(phoneNumber);
+    return contact;
   }
 }

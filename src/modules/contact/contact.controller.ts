@@ -1,7 +1,8 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ContactService } from './contact.service';
 
+@ApiTags('contacts')
 @Controller('contacts')
 export class ContactController {
   constructor(private readonly contactService: ContactService) {}

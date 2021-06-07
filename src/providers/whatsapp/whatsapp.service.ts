@@ -132,7 +132,7 @@ export class WhatsappService {
     return contact;
   }
 
-  handleNumber(number: string) {
+  private handleNumber(number: string) {
     const formattedNumber = `${number}@c.us`;
     return formattedNumber;
   }

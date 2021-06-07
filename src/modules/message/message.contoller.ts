@@ -8,8 +8,10 @@ import {
 import { MessageService } from './message.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import uploadConfig from '@config/upload';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { SendMessageRequestDto } from './dto/SendMessageRequestDto';
 
+@ApiTags('messages')
 @Controller('messages')
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
@@ -20,6 +22,7 @@ export class MessageController {
       storage: uploadConfig.multer.storage,
     }),
   )
+  @ApiConsumes('multipart/form-data', 'json')
   async sendMessage(
     @Body() body: SendMessageRequestDto,
     @UploadedFile() file?: Express.Multer.File,

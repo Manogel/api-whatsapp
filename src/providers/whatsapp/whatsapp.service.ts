@@ -55,22 +55,32 @@ export class WhatsappService {
 
   async sendTextMessage(data: SendMessageTextDto) {
     const { to, message } = data;
-    const response = await this.client.sendText(to, message as string);
+    const formattedNumber = this.handleNumber(to);
+    const response = await this.client.sendText(
+      formattedNumber,
+      message as string,
+    );
 
     return response;
   }
 
   async sendFileMessage(data: SendMessageFileDto) {
     const { to, path, filename } = data;
-    const response = await this.client.sendFile(to, path, filename);
+    const formattedNumber = this.handleNumber(to);
+    const response = await this.client.sendFile(
+      formattedNumber,
+      path,
+      filename,
+    );
 
     return response;
   }
 
   async sendVideoMessage(data: SendMessageVideoAsGifDto) {
     const { to, path, filename, subtitle } = data;
+    const formattedNumber = this.handleNumber(to);
     const response = await this.client.sendVideoAsGif(
-      to,
+      formattedNumber,
       path,
       filename,
       subtitle,
@@ -81,21 +91,33 @@ export class WhatsappService {
 
   async sendImageMessage(data: SendMessageImageDto) {
     const { to, path, filename } = data;
-    const response = await this.client.sendImage(to, path, filename);
+    const formattedNumber = this.handleNumber(to);
+    const response = await this.client.sendImage(
+      formattedNumber,
+      path,
+      filename,
+    );
 
     return response;
   }
 
   async sendVoiceMessage(data: SendMessageVoiceDto) {
     const { to, path } = data;
-    const response = await this.client.sendVoice(to, path);
+    const formattedNumber = this.handleNumber(to);
+    const response = await this.client.sendVoice(formattedNumber, path);
 
     return response;
   }
 
   async sendFileDocument(data: SendFileDocumentDto) {
     const { to, path, filename, subtitle } = data;
-    const response = await this.client.sendFile(to, path, filename, subtitle);
+    const formattedNumber = this.handleNumber(to);
+    const response = await this.client.sendFile(
+      formattedNumber,
+      path,
+      filename,
+      subtitle,
+    );
 
     return response;
   }
@@ -105,7 +127,13 @@ export class WhatsappService {
   }
 
   async getContact(phoneNumber: string) {
-    const contact = await this.client.getContact(phoneNumber);
+    const formattedNumber = this.handleNumber(phoneNumber);
+    const contact = await this.client.getContact(formattedNumber);
     return contact;
+  }
+
+  private handleNumber(number: string) {
+    const formattedNumber = `${number}@c.us`;
+    return formattedNumber;
   }
 }

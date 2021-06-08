@@ -27,10 +27,11 @@ export class MessageController {
     @Body() body: SendMessageRequestDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    this.messageService.sendMessage({
+    const response = await this.messageService.sendMessage({
       to: body.to,
       subtitle: body.subtitle,
       message: file || body.message,
     });
+    return response;
   }
 }

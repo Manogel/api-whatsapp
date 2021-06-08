@@ -26,6 +26,5 @@ export class SendMessageRequestDto {
     required: true,
     description: 'Exemplo:Uma mensagem de texto ou um caminho de um arquivo ',
   })
-  @IsNotEmpty()
   message: Express.Multer.File | string;
 }

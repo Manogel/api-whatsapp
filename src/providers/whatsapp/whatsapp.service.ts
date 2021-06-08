@@ -37,11 +37,11 @@ export class WhatsappService {
       });
   }
 
-  onWaitQrCode: CatchQR = (qrCode) => {
+  private onWaitQrCode: CatchQR = (qrCode) => {
     this.socketGateway.broadcast(EventTypes.QR_CODE, qrCode);
   };
 
-  onGetStatus: StatusFind = (statusGet) => {
+  private onGetStatus: StatusFind = (statusGet) => {
     this.socketGateway.broadcast(EventTypes.CONNECTION_STATUS, statusGet);
   };
 
@@ -49,77 +49,77 @@ export class WhatsappService {
     await this.client.onMessage(this.onMessage);
   }
 
-  onMessage(message: Message) {
+  private onMessage(message: Message) {
     this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, message);
   }
 
   async sendTextMessage(data: SendMessageTextDto) {
     const { to, message } = data;
     const formattedNumber = this.handleNumber(to);
-    const response = await this.client.sendText(
+    const textMessage = await this.client.sendText(
       formattedNumber,
       message as string,
     );
 
-    return response;
+    return textMessage;
   }
 
   async sendFileMessage(data: SendMessageFileDto) {
     const { to, path, filename } = data;
     const formattedNumber = this.handleNumber(to);
-    const response = await this.client.sendFile(
+    const fileMessage = await this.client.sendFile(
       formattedNumber,
       path,
       filename,
     );
 
-    return response;
+    return fileMessage;
   }
 
   async sendVideoMessage(data: SendMessageVideoAsGifDto) {
     const { to, path, filename, subtitle } = data;
     const formattedNumber = this.handleNumber(to);
-    const response = await this.client.sendVideoAsGif(
+    const videoMessage = await this.client.sendVideoAsGif(
       formattedNumber,
       path,
       filename,
       subtitle,
     );
 
-    return response;
+    return videoMessage;
   }
 
   async sendImageMessage(data: SendMessageImageDto) {
     const { to, path, filename } = data;
     const formattedNumber = this.handleNumber(to);
-    const response = await this.client.sendImage(
+    const imageMessage = await this.client.sendImage(
       formattedNumber,
       path,
       filename,
     );
 
-    return response;
+    return imageMessage;
   }
 
   async sendVoiceMessage(data: SendMessageVoiceDto) {
     const { to, path } = data;
     const formattedNumber = this.handleNumber(to);
-    const response = await this.client.sendVoice(formattedNumber, path);
+    const voiceMessage = await this.client.sendVoice(formattedNumber, path);
 
-    return response;
+    return voiceMessage;
   }
 
   async sendFileDocument(data: SendFileDocumentDto) {
     const { to, path, filename, subtitle } = data;
     const formattedNumber = this.handleNumber(to);
-    const response = await this.client.sendFile(
+    const fileDocument = await this.client.sendFile(
       formattedNumber,
       path,
       filename,
       subtitle,
     );
 
-    return response;
+    return fileDocument;
   }
   async getContactList() {
     const contacts = await this.client.getAllContacts();

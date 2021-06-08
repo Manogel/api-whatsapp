@@ -41,7 +41,7 @@ export class WhatsappService {
     this.socketGateway.broadcast(EventTypes.QR_CODE, qrCode);
   };
 
-  private onGetStatus: StatusFind = (statusGet) => {
+  onGetStatus: StatusFind = (statusGet) => {
     this.socketGateway.broadcast(EventTypes.CONNECTION_STATUS, statusGet);
   };
 

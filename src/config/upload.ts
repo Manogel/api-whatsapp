@@ -2,14 +2,21 @@ import crypto from 'crypto';
 import { diskStorage } from 'multer';
 import { resolve } from 'path';
 
-const tmpFolder = resolve(__dirname, '..', '..', '..', 'tmp', 'uploads');
+const uploadsFolderPath = resolve(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  'tmp',
+  'uploads',
+);
 
 const uploadConfig = {
-  tmpFolder,
-  uploadsFolder: resolve(tmpFolder, 'uploads'),
+  uploadsFolderPath,
+  uploadsFolder: resolve(uploadsFolderPath, 'uploads'),
   multer: {
     storage: diskStorage({
-      destination: tmpFolder,
+      destination: uploadsFolderPath,
       filename(_req, _file, cb) {
         const filehash = crypto.randomBytes(10).toString('hex');
         const ext = _file.originalname.split('.').pop();

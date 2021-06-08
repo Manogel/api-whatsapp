@@ -9,9 +9,8 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const appConfig = getAsyncAppConfig();
-  // Deixei uma variavel ambiente como melhoria
   const PORT = appConfig.port;
-  app.use('/files', express.static(uploadConfig.tmpFolder));
+  app.use('/files', express.static(uploadConfig.uploadsFolder));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

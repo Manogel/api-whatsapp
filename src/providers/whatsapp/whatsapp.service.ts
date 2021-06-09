@@ -56,80 +56,112 @@ export class WhatsappService {
   async sendTextMessage(data: SendMessageTextDto) {
     const { to, message } = data;
     const formattedNumber = this.handleNumber(to);
-    const textMessage = await this.client.sendText(
-      formattedNumber,
-      message as string,
-    );
+    try {
+      const textMessage = await this.client.sendText(
+        formattedNumber,
+        message as string,
+      );
 
-    return textMessage;
+      return textMessage;
+    } catch (error) {
+      return { error: 'Conecte o whatsapp' };
+    }
   }
 
   async sendFileMessage(data: SendMessageFileDto) {
     const { to, path, filename } = data;
     const formattedNumber = this.handleNumber(to);
-    const fileMessage = await this.client.sendFile(
-      formattedNumber,
-      path,
-      filename,
-    );
+    try {
+      const fileMessage = await this.client.sendFile(
+        formattedNumber,
+        path,
+        filename,
+      );
 
-    return fileMessage;
+      return fileMessage;
+    } catch (error) {
+      return { error: 'Conecte o whatsapp' };
+    }
   }
 
   async sendVideoMessage(data: SendMessageVideoAsGifDto) {
     const { to, path, filename, subtitle } = data;
     const formattedNumber = this.handleNumber(to);
-    const videoMessage = await this.client.sendVideoAsGif(
-      formattedNumber,
-      path,
-      filename,
-      subtitle,
-    );
+    try {
+      const videoMessage = await this.client.sendVideoAsGif(
+        formattedNumber,
+        path,
+        filename,
+        subtitle,
+      );
 
-    return videoMessage;
+      return videoMessage;
+    } catch (error) {
+      return { error: 'Conecte o whatsapp' };
+    }
   }
 
   async sendImageMessage(data: SendMessageImageDto) {
     const { to, path, filename } = data;
     const formattedNumber = this.handleNumber(to);
-    const imageMessage = await this.client.sendImage(
-      formattedNumber,
-      path,
-      filename,
-    );
+    try {
+      const imageMessage = await this.client.sendImage(
+        formattedNumber,
+        path,
+        filename,
+      );
 
-    return imageMessage;
+      return imageMessage;
+    } catch (error) {
+      return { error: 'Conecte o whatsapp' };
+    }
   }
 
   async sendVoiceMessage(data: SendMessageVoiceDto) {
     const { to, path } = data;
     const formattedNumber = this.handleNumber(to);
-    const voiceMessage = await this.client.sendVoice(formattedNumber, path);
+    try {
+      const voiceMessage = await this.client.sendVoice(formattedNumber, path);
 
-    return voiceMessage;
+      return voiceMessage;
+    } catch (error) {
+      return { error: 'Conecte o whatsapp' };
+    }
   }
 
   async sendFileDocument(data: SendFileDocumentDto) {
     const { to, path, filename, subtitle } = data;
     const formattedNumber = this.handleNumber(to);
-    const fileDocument = await this.client.sendFile(
-      formattedNumber,
-      path,
-      filename,
-      subtitle,
-    );
+    try {
+      const fileDocument = await this.client.sendFile(
+        formattedNumber,
+        path,
+        filename,
+        subtitle,
+      );
 
-    return fileDocument;
+      return fileDocument;
+    } catch (error) {
+      return { error: 'Conecte o whatsapp' };
+    }
   }
   async getContactList() {
-    const contacts = await this.client.getAllContacts();
-    return contacts;
+    try {
+      const contacts = await this.client.getAllContacts();
+      return contacts;
+    } catch (error) {
+      return { error: 'Conecte o whatsapp' };
+    }
   }
 
   async getContact(phoneNumber: string) {
-    const formattedNumber = this.handleNumber(phoneNumber);
-    const contact = await this.client.getContact(formattedNumber);
-    return contact;
+    try {
+      const formattedNumber = this.handleNumber(phoneNumber);
+      const contact = await this.client.getContact(formattedNumber);
+      return contact;
+    } catch (error) {
+      return { error: 'Conecte o whatsapp' };
+    }
   }
 
   private handleNumber(number: string) {

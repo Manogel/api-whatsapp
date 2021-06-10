@@ -54,118 +54,127 @@ export class WhatsappService {
   }
 
   async sendTextMessage(data: SendMessageTextDto) {
+    const isLogged = this.isLogged();
+    if (isLogged) {
+      return { error: 'Whatsapp desconectado' };
+    }
     const { to, message } = data;
     const formattedNumber = this.handleNumber(to);
-    try {
-      const textMessage = await this.client.sendText(
-        formattedNumber,
-        message as string,
-      );
 
-      return textMessage;
-    } catch (error) {
-      return { error: 'Conecte o whatsapp' };
-    }
+    const textMessage = await this.client.sendText(
+      formattedNumber,
+      message as string,
+    );
+
+    return textMessage;
   }
 
   async sendFileMessage(data: SendMessageFileDto) {
+    const isLogged = this.isLogged();
+    if (isLogged) {
+      return { error: 'Whatsapp desconectado' };
+    }
     const { to, path, filename } = data;
     const formattedNumber = this.handleNumber(to);
-    try {
-      const fileMessage = await this.client.sendFile(
-        formattedNumber,
-        path,
-        filename,
-      );
 
-      return fileMessage;
-    } catch (error) {
-      return { error: 'Conecte o whatsapp' };
-    }
+    const fileMessage = await this.client.sendFile(
+      formattedNumber,
+      path,
+      filename,
+    );
+
+    return fileMessage;
   }
 
   async sendVideoMessage(data: SendMessageVideoAsGifDto) {
+    const isLogged = this.isLogged();
+    if (isLogged) {
+      return { error: 'Whatsapp desconectado' };
+    }
     const { to, path, filename, subtitle } = data;
     const formattedNumber = this.handleNumber(to);
-    try {
-      const videoMessage = await this.client.sendVideoAsGif(
-        formattedNumber,
-        path,
-        filename,
-        subtitle,
-      );
 
-      return videoMessage;
-    } catch (error) {
-      return { error: 'Conecte o whatsapp' };
-    }
+    const videoMessage = await this.client.sendVideoAsGif(
+      formattedNumber,
+      path,
+      filename,
+      subtitle,
+    );
+
+    return videoMessage;
   }
 
   async sendImageMessage(data: SendMessageImageDto) {
+    const isLogged = this.isLogged();
+    if (isLogged) {
+      return { error: 'Whatsapp desconectado' };
+    }
     const { to, path, filename } = data;
     const formattedNumber = this.handleNumber(to);
-    try {
-      const imageMessage = await this.client.sendImage(
-        formattedNumber,
-        path,
-        filename,
-      );
 
-      return imageMessage;
-    } catch (error) {
-      return { error: 'Conecte o whatsapp' };
-    }
+    const imageMessage = await this.client.sendImage(
+      formattedNumber,
+      path,
+      filename,
+    );
+
+    return imageMessage;
   }
 
   async sendVoiceMessage(data: SendMessageVoiceDto) {
+    const isLogged = this.isLogged();
+    if (isLogged) {
+      return { error: 'Whatsapp desconectado' };
+    }
     const { to, path } = data;
     const formattedNumber = this.handleNumber(to);
-    try {
-      const voiceMessage = await this.client.sendVoice(formattedNumber, path);
 
-      return voiceMessage;
-    } catch (error) {
-      return { error: 'Conecte o whatsapp' };
-    }
+    const voiceMessage = await this.client.sendVoice(formattedNumber, path);
+
+    return voiceMessage;
   }
 
   async sendFileDocument(data: SendFileDocumentDto) {
+    const isLogged = this.isLogged();
+    if (isLogged) {
+      return { error: 'Whatsapp desconectado' };
+    }
     const { to, path, filename, subtitle } = data;
     const formattedNumber = this.handleNumber(to);
-    try {
-      const fileDocument = await this.client.sendFile(
-        formattedNumber,
-        path,
-        filename,
-        subtitle,
-      );
 
-      return fileDocument;
-    } catch (error) {
-      return { error: 'Conecte o whatsapp' };
-    }
+    const fileDocument = await this.client.sendFile(
+      formattedNumber,
+      path,
+      filename,
+      subtitle,
+    );
+
+    return fileDocument;
   }
   async getContactList() {
-    try {
-      const contacts = await this.client.getAllContacts();
-      return contacts;
-    } catch (error) {
-      return { error: 'Conecte o whatsapp' };
+    const isLogged = this.isLogged();
+    if (isLogged) {
+      return { error: 'Whatsapp desconectado' };
     }
+    const contacts = await this.client.getAllContacts();
+    return contacts;
   }
 
   async getContact(phoneNumber: string) {
-    try {
-      const formattedNumber = this.handleNumber(phoneNumber);
-      const contact = await this.client.getContact(formattedNumber);
-      return contact;
-    } catch (error) {
-      return { error: 'Conecte o whatsapp' };
+    const isLogged = this.isLogged();
+    if (isLogged) {
+      return { error: 'Whatsapp desconectado' };
     }
+    const formattedNumber = this.handleNumber(phoneNumber);
+    const contact = await this.client.getContact(formattedNumber);
+    return contact;
   }
 
   private handleNumber(number: string) {
     const formattedNumber = `${number}@c.us`;
     return formattedNumber;
+  }
+  private isLogged() {
+    if (!this.client) return true;
   }
 }

@@ -1,33 +1,48 @@
 import { getAsyncAppConfig } from '@config/app';
 import { Injectable } from '@nestjs/common';
-import { Whatsapp, create, CatchQR, Message } from 'venom-bot';
-import { SendFileMessageDto } from './dtos/SendFileMessageDto';
-import { SendTextMessageDto } from './dtos/SendTextMessageDto';
-import { SendVoiceMessageDto } from './dtos/SendVoiceMessageDto';
+import { Whatsapp, create, CatchQR, Message, StatusFind } from 'venom-bot';
+import {
+  SendMessageVideoAsGifDto,
+  SendMessageFileDto,
+  SendMessageTextDto,
+  SendMessageImageDto,
+  SendMessageVoiceDto,
+  SendFileDocumentDto,
+} from './dtos/SendMessageDto';
+import { SocketGateway } from '../socketio/socketio.gateway';
+import { EventTypes } from '../socketio/dto/eventType.dto';
 
 @Injectable()
 export class WhatsappService {
   private client: Whatsapp;
 
-  constructor() {
+  constructor(private readonly socketGateway: SocketGateway) {
     const appConfig = getAsyncAppConfig();
 
-    create({
-      session: appConfig.appname,
-      logQR: false,
-      catchQR: this.onWaitQrCode,
-    })
-      .then((client) => {
-        this.client = client;
-        console.log('client');
-      })
-      .catch(() => {
-        console.log('Erro ao criar instancia do whatsapp');
-      });
+    // create({
+    //   session: appConfig.appname,
+    //   logQR: true,
+    //   catchQR: this.onWaitQrCode,
+    //   statusFind: this.onGetStatus,
+    // })
+    //   .then((client) => {
+    //     this.client = client;
+
+    //     process.on('SIGINT', function () {
+    //       client.close();
+    //     });
+    //   })
+    //   .catch(() => {
+    //     console.log('Erro ao criar instancia do whatsapp');
+    //   });
   }
 
   onWaitQrCode: CatchQR = (qrCode) => {
-    console.log('qrCode');
+    this.socketGateway.broadcast(EventTypes.QR_CODE, qrCode);
+  };
+
+  onGetStatus: StatusFind = (statusGet) => {
+    this.socketGateway.broadcast(EventTypes.CONNECTION_STATUS, statusGet);
   };
 
   async listenOnMessage() {
@@ -35,39 +50,90 @@ export class WhatsappService {
   }
 
   onMessage(message: Message) {
-    console.log('received message');
-    console.log(message);
+    this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, message);
   }
 
-  async sendTextMessage(data: SendTextMessageDto) {
+  async sendTextMessage(data: SendMessageTextDto) {
     const { to, message } = data;
-    const response = await this.client.sendText(to, message);
+    const formattedNumber = this.handleNumber(to);
+    const response = await this.client.sendText(
+      formattedNumber,
+      message as string,
+    );
 
     return response;
   }
 
-  async sendFileMessage(data: SendFileMessageDto) {
-    const { to, base64, filename } = data;
-    const response = await this.client.sendFileFromBase64(to, base64, filename);
-
-    return response;
-  }
-
-  async sendImageMessage(data: SendFileMessageDto) {
-    const { to, base64, filename } = data;
-    const response = await this.client.sendImageFromBase64(
-      to,
-      base64,
+  async sendFileMessage(data: SendMessageFileDto) {
+    const { to, path, filename } = data;
+    const formattedNumber = this.handleNumber(to);
+    const response = await this.client.sendFile(
+      formattedNumber,
+      path,
       filename,
     );
 
     return response;
   }
 
-  async sendVoiceMessage(data: SendVoiceMessageDto) {
-    const { to, base64 } = data;
-    const response = await this.client.sendVoiceBase64(to, base64);
+  async sendVideoMessage(data: SendMessageVideoAsGifDto) {
+    const { to, path, filename, subtitle } = data;
+    const formattedNumber = this.handleNumber(to);
+    const response = await this.client.sendVideoAsGif(
+      formattedNumber,
+      path,
+      filename,
+      subtitle,
+    );
 
     return response;
+  }
+
+  async sendImageMessage(data: SendMessageImageDto) {
+    const { to, path, filename } = data;
+    const formattedNumber = this.handleNumber(to);
+    const response = await this.client.sendImage(
+      formattedNumber,
+      path,
+      filename,
+    );
+
+    return response;
+  }
+
+  async sendVoiceMessage(data: SendMessageVoiceDto) {
+    const { to, path } = data;
+    const formattedNumber = this.handleNumber(to);
+    const response = await this.client.sendVoice(formattedNumber, path);
+
+    return response;
+  }
+
+  async sendFileDocument(data: SendFileDocumentDto) {
+    const { to, path, filename, subtitle } = data;
+    const formattedNumber = this.handleNumber(to);
+    const response = await this.client.sendFile(
+      formattedNumber,
+      path,
+      filename,
+      subtitle,
+    );
+
+    return response;
+  }
+  async getContactList() {
+    const contacts = await this.client.getAllContacts();
+    return contacts;
+  }
+
+  async getContact(phoneNumber: string) {
+    const formattedNumber = this.handleNumber(phoneNumber);
+    const contact = await this.client.getContact(formattedNumber);
+    return contact;
+  }
+
+  private handleNumber(number: string) {
+    const formattedNumber = `${number}@c.us`;
+    return formattedNumber;
   }
 }

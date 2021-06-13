@@ -7,6 +7,7 @@ import { WhatsappModule } from './providers/whatsapp/whatsapp.module';
 import { SocketioModule } from './providers/socketio/socketio.module';
 import { MessageModule } from './modules/message/message.module';
 import { ContactModule } from './modules/contact/contact.module';
+import { PrismaModule } from './providers/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ContactModule } from './modules/contact/contact.module';
     WhatsappModule,
     MessageModule,
     ContactModule,
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

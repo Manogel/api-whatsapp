@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "ms-vscode.vscode-typescript-tslint-plugin",
+    "esbenp.prettier-vscode",
+    "prisma.prisma",
+    "mikestead.dotenv",
+    "usernamehw.errorlens",
+    "abhijoybasak.nestjs-files"
+  ]
+}

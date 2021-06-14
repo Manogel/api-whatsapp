@@ -19,22 +19,22 @@ export class WhatsappService {
   constructor(private readonly socketGateway: SocketGateway) {
     const appConfig = getAsyncAppConfig();
 
-    create({
-      session: appConfig.appname,
-      logQR: true,
-      catchQR: this.onWaitQrCode,
-      statusFind: this.onGetStatus,
-    })
-      .then((client) => {
-        this.client = client;
+    // create({
+    //   session: appConfig.appname,
+    //   logQR: true,
+    //   catchQR: this.onWaitQrCode,
+    //   statusFind: this.onGetStatus,
+    // })
+    //   .then((client) => {
+    //     this.client = client;
 
-        process.on('SIGINT', function () {
-          client.close();
-        });
-      })
-      .catch(() => {
-        console.log('Erro ao criar instancia do whatsapp');
-      });
+    //     process.on('SIGINT', function () {
+    //       client.close();
+    //     });
+    //   })
+    //   .catch(() => {
+    //     console.log('Erro ao criar instancia do whatsapp');
+    //   });
   }
 
   onWaitQrCode: CatchQR = (qrCode) => {

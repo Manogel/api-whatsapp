@@ -11,6 +11,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:watch": "nodemon",
+    "start:docker": "npm run migrate:generate && npm rum start:dev",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -22,7 +23,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migrate:create": "prisma migrate dev --name",
     "migrate:deploy": "prisma migrate deploy",
-    "migrate:reset": "prisma migrate reset"
+    "migrate:reset": "prisma migrate reset",
+    "migrate:generate": "npm run prisma migrate:deploy",
+    "postinstall": "npm run prisma migrate:deploy"
   },
   "dependencies": {
     "@nestjs/common": "^7.6.15",

@@ -1,18 +1,25 @@
-version: '3'
+version: '3.7'
 services:
+  postgres:
+    image: postgres:13.1-alpine
+    container_name: 'whatsapp_db'
+    ports:
+      - 5432:5432
+    env_file: .env.development
+
   server:
     build:
       context: .
-    command: yarn start:watch
+    command: yarn start:docker
     container_name: api_whatsapp
-    env_file: .env
-    environment:
-      - PORT=3000
+    env_file: .env.development
     ports:
-      - '3000:3000'
+      - '3333:3333'
     volumes:
       - './src:/app/src'
       - './nest-cli.json:/app/nest-cli.json'
-      - './nodemon.json:/app/nodemon.json'
       - './tsconfig.json:/app/tsconfig.json'
       - './tsconfig.build.json:/app/tsconfig.build.json'
+      - './prisma:/app/prisma'
+    depends_on:
+      - postgres

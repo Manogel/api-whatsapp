@@ -1,13 +1,6 @@
 import { getAsyncAppConfig } from '@config/app';
 import { Injectable } from '@nestjs/common';
-import {
-  Whatsapp,
-  create,
-  CatchQR,
-  Message,
-  StatusFind,
-  Contact,
-} from 'venom-bot';
+import { Whatsapp, create, CatchQR, Message, StatusFind } from 'venom-bot';
 import {
   SendMessageVideoAsGifDto,
   SendMessageFileDto,
@@ -16,10 +9,8 @@ import {
   SendMessageVoiceDto,
   SendFileDocumentDto,
 } from './dtos/SendMessageDto';
-import {} from 'wix-react-native-contacts';
 import { SocketGateway } from '../socketio/socketio.gateway';
 import { EventTypes } from '../socketio/dto/eventType.dto';
-import { ReturnContactsDto } from './dtos/ReturnContactsDto';
 
 @Injectable()
 export class WhatsappService {

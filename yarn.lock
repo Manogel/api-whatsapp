@@ -7135,11 +7135,6 @@ windows-release@^4.0.0:
   dependencies:
     execa "^4.0.2"
 
-wix-react-native-contacts@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/wix-react-native-contacts/-/wix-react-native-contacts-1.1.0.tgz#cf3625369a1ef1b9ca9eb5d164b30b3dbdbb301e"
-  integrity sha1-zzYlNpoe8bnKnrXRZLMLPb27MB4=
-
 word-wrap@^1.2.3, word-wrap@~1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/word-wrap/-/word-wrap-1.2.3.tgz#610636f6b1f703891bd34771ccb17fb93b47079c"

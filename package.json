@@ -38,7 +38,8 @@
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.6",
     "swagger-ui-express": "^4.1.6",
-    "venom-bot": "^3.0.15"
+    "venom-bot": "^3.0.18",
+    "wix-react-native-contacts": "^1.1.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.6.0",

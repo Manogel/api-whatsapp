@@ -1,6 +1,13 @@
 import { getAsyncAppConfig } from '@config/app';
 import { Injectable } from '@nestjs/common';
-import { Whatsapp, create, CatchQR, Message, StatusFind } from 'venom-bot';
+import {
+  Whatsapp,
+  create,
+  CatchQR,
+  Message,
+  StatusFind,
+  Contact,
+} from 'venom-bot';
 import {
   SendMessageVideoAsGifDto,
   SendMessageFileDto,
@@ -9,13 +16,14 @@ import {
   SendMessageVoiceDto,
   SendFileDocumentDto,
 } from './dtos/SendMessageDto';
+import {} from 'wix-react-native-contacts';
 import { SocketGateway } from '../socketio/socketio.gateway';
 import { EventTypes } from '../socketio/dto/eventType.dto';
+import { ReturnContactsDto } from './dtos/ReturnContactsDto';
 
 @Injectable()
 export class WhatsappService {
-  private client: Whatsapp;
-
+  client: Whatsapp = undefined;
   constructor(private readonly socketGateway: SocketGateway) {
     const appConfig = getAsyncAppConfig();
 
@@ -24,6 +32,7 @@ export class WhatsappService {
       logQR: true,
       catchQR: this.onWaitQrCode,
       statusFind: this.onGetStatus,
+      autoClose: 90000,
     })
       .then((client) => {
         this.client = client;
@@ -37,12 +46,39 @@ export class WhatsappService {
       });
   }
 
-  private onWaitQrCode: CatchQR = (qrCode) => {
-    this.socketGateway.broadcast(EventTypes.QR_CODE, qrCode);
+  private onWaitQrCode: CatchQR = (base64Qr) => {
+    this.socketGateway.broadcast(EventTypes.QR_CODE, base64Qr);
   };
+
+  async showStatus() {
+    const response = Promise.all([
+      (await this.client.getHostDevice()).wid._serialized,
+      await this.client.getBatteryLevel(),
+      await this.client.isConnected(),
+      await this.client.isLoggedIn(),
+      await this.client.getWAVersion(),
+    ]).then((values) => {
+      const resp = {
+        data: {
+          status: {
+            mode: 'MAIN',
+            myNumber: values[0],
+            batteryLevel: values[1],
+            isPhoneConnected: values[2],
+            isLoggedIn: values[3],
+            waVersion: values[4],
+          },
+        },
+      };
+      return resp;
+    });
+    return response;
+  }
 
   onGetStatus: StatusFind = (statusGet) => {
     this.socketGateway.broadcast(EventTypes.CONNECTION_STATUS, statusGet);
+
+    return statusGet;
   };
 
   async listenOnMessage() {
@@ -54,10 +90,8 @@ export class WhatsappService {
   }
 
   async sendTextMessage(data: SendMessageTextDto) {
-    const isLogged = this.isLogged();
-    if (isLogged) {
-      return { error: 'Whatsapp desconectado' };
-    }
+    this.isLogged();
+
     const { to, message } = data;
     const formattedNumber = this.handleNumber(to);
 
@@ -70,10 +104,8 @@ export class WhatsappService {
   }
 
   async sendFileMessage(data: SendMessageFileDto) {
-    const isLogged = this.isLogged();
-    if (isLogged) {
-      return { error: 'Whatsapp desconectado' };
-    }
+    this.isLogged();
+
     const { to, path, filename } = data;
     const formattedNumber = this.handleNumber(to);
 
@@ -87,10 +119,8 @@ export class WhatsappService {
   }
 
   async sendVideoMessage(data: SendMessageVideoAsGifDto) {
-    const isLogged = this.isLogged();
-    if (isLogged) {
-      return { error: 'Whatsapp desconectado' };
-    }
+    this.isLogged();
+
     const { to, path, filename, subtitle } = data;
     const formattedNumber = this.handleNumber(to);
 
@@ -105,10 +135,8 @@ export class WhatsappService {
   }
 
   async sendImageMessage(data: SendMessageImageDto) {
-    const isLogged = this.isLogged();
-    if (isLogged) {
-      return { error: 'Whatsapp desconectado' };
-    }
+    this.isLogged();
+
     const { to, path, filename } = data;
     const formattedNumber = this.handleNumber(to);
 
@@ -122,10 +150,8 @@ export class WhatsappService {
   }
 
   async sendVoiceMessage(data: SendMessageVoiceDto) {
-    const isLogged = this.isLogged();
-    if (isLogged) {
-      return { error: 'Whatsapp desconectado' };
-    }
+    this.isLogged();
+
     const { to, path } = data;
     const formattedNumber = this.handleNumber(to);
 
@@ -135,10 +161,8 @@ export class WhatsappService {
   }
 
   async sendFileDocument(data: SendFileDocumentDto) {
-    const isLogged = this.isLogged();
-    if (isLogged) {
-      return { error: 'Whatsapp desconectado' };
-    }
+    this.isLogged();
+
     const { to, path, filename, subtitle } = data;
     const formattedNumber = this.handleNumber(to);
 
@@ -151,20 +175,18 @@ export class WhatsappService {
 
     return fileDocument;
   }
+
   async getContactList() {
-    const isLogged = this.isLogged();
-    if (isLogged) {
-      return { error: 'Whatsapp desconectado' };
-    }
+    this.isLogged();
+
     const contacts = await this.client.getAllContacts();
+
     return contacts;
   }
 
   async getContact(phoneNumber: string) {
-    const isLogged = this.isLogged();
-    if (isLogged) {
-      return { error: 'Whatsapp desconectado' };
-    }
+    this.isLogged();
+
     const formattedNumber = this.handleNumber(phoneNumber);
     const contact = await this.client.getContact(formattedNumber);
     return contact;
@@ -175,6 +197,6 @@ export class WhatsappService {
     return formattedNumber;
   }
   private isLogged() {
-    if (!this.client) return true;
+    if (!this.client) throw new Error('Whatsapp desconectado');
   }
 }

@@ -2,17 +2,9 @@ import crypto from 'crypto';
 import { diskStorage } from 'multer';
 import { resolve } from 'path';
 
-const uploadsFolderPath = resolve(
-  __dirname,
-  '..',
-  '..',
-  '..',
-  'tmp',
-  'uploads',
-);
+const uploadsFolderPath = resolve(__dirname, '..', '..', '..', 'tmp');
 
 const uploadConfig = {
-  uploadsFolderPath,
   uploadsFolder: resolve(uploadsFolderPath, 'uploads'),
   multer: {
     storage: diskStorage({

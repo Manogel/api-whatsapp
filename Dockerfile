@@ -8,7 +8,7 @@ COPY package.json ./
 COPY prisma ./prisma/
 
 # For mac m1 use:
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+# ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 # Here we install all the deps
 RUN yarn

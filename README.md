@@ -48,6 +48,12 @@ For any update in the Prisma schema `prisma/schema.prisma` execute this command:
 $ npm run migration:create <migration-name>
 ```
 
+You need execute to generate updated types:
+
+```bash
+$ npm run prisma:generate
+```
+
 ### 5. Running the app
 
 ```bash
@@ -63,7 +69,23 @@ $ npm run start:prod
 
 # Start with docker
 
-in progress ...
+### 1. Installation
+
+```bash
+$ make build
+```
+
+### ⚠️ For each any updates in schema.prisma restart application with: ⚠️
+
+```bash
+$ make run
+```
+
+### After build, for next executions use:
+
+```bash
+$ make run
+```
 
 # Test
 

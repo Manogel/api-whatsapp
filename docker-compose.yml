@@ -16,10 +16,7 @@ services:
     ports:
       - '3333:3333'
     volumes:
-      - './src:/app/src'
-      - './nest-cli.json:/app/nest-cli.json'
-      - './tsconfig.json:/app/tsconfig.json'
-      - './tsconfig.build.json:/app/tsconfig.build.json'
-      - './prisma:/app/prisma'
+      - .:/app
+      - ./app/node_modules
     depends_on:
       - postgres

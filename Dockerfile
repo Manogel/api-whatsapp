@@ -4,21 +4,17 @@ FROM buildkite/puppeteer:latest
 
 WORKDIR /app
 
-# Copy files we need
-COPY src /app/src
-COPY yarn.lock /app
-COPY Makefile /app
-COPY package.json /app
-COPY tsconfig.json /app
-COPY tsconfig.build.json /app
-COPY nest-cli.json /app
-COPY prisma /app/prisma/
+COPY package.json ./
+COPY prisma ./prisma/
 
 # For mac m1 use:
-# ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
-# Install our package
+# Here we install all the deps
 RUN yarn
+
+# Bundle app source / copy all other files
+COPY . .
 
 # Set timezone
 ENV TZ='America/Sao_Paulo'

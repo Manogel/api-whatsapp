@@ -10,6 +10,7 @@ const uploadConfig = {
     storage: diskStorage({
       destination: uploadsFolderPath,
       filename(_req, _file, cb) {
+        console.log(_file, 'aqui no multer');
         const filehash = crypto.randomBytes(10).toString('hex');
         const ext = _file.originalname.split('.').pop();
         const filename = `${filehash}-${Date.now()}.${ext}`;

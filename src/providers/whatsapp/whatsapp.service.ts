@@ -27,7 +27,9 @@ export class WhatsappService {
     })
       .then((client) => {
         this.client = client;
-
+        this.client.onMessage((message) => {
+          this.onMessage(message);
+        });
         process.on('SIGINT', function () {
           client.close();
         });
@@ -42,46 +44,42 @@ export class WhatsappService {
   };
 
   async showStatus() {
-    const response = Promise.all([
-      (await this.client.getHostDevice()).wid._serialized,
-      await this.client.getBatteryLevel(),
-      await this.client.isConnected(),
-      await this.client.isLoggedIn(),
-      await this.client.getWAVersion(),
-    ]).then((values) => {
-      const resp = {
-        data: {
-          status: {
-            mode: 'MAIN',
-            myNumber: values[0],
-            batteryLevel: values[1],
-            isPhoneConnected: values[2],
-            isLoggedIn: values[3],
-            waVersion: values[4],
-          },
+    const getHostDevice = await this.client.getHostDevice();
+    const response = await Promise.all([
+      getHostDevice.wid._serialized,
+      this.client.getBatteryLevel(),
+      this.client.isConnected(),
+      this.client.isLoggedIn(),
+      this.client.getWAVersion(),
+    ]);
+    const resp = {
+      data: {
+        status: {
+          mode: 'MAIN',
+          myNumber: response[0],
+          batteryLevel: response[1],
+          isPhoneConnected: response[2],
+          isLoggedIn: response[3],
+          waVersion: response[4],
         },
-      };
-      return resp;
-    });
-    return response;
+      },
+    };
+
+    return resp;
   }
 
-  onGetStatus: StatusFind = (statusGet) => {
+  private onGetStatus: StatusFind = (statusGet) => {
     this.socketGateway.broadcast(EventTypes.CONNECTION_STATUS, statusGet);
 
     return statusGet;
   };
-
-  async listenOnMessage() {
-    await this.client.onMessage(this.onMessage);
-  }
 
   private onMessage(message: Message) {
     this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, message);
   }
 
   async sendTextMessage(data: SendMessageTextDto) {
-    this.isLogged();
+    this.verifyHasLogged();
 
     const { to, message } = data;
     const formattedNumber = this.handleNumber(to);
@@ -95,7 +93,7 @@ export class WhatsappService {
   }
 
   async sendFileMessage(data: SendMessageFileDto) {
-    this.isLogged();
+    this.verifyHasLogged();
 
     const { to, path, filename } = data;
     const formattedNumber = this.handleNumber(to);
@@ -110,7 +108,7 @@ export class WhatsappService {
   }
 
   async sendVideoMessage(data: SendMessageVideoAsGifDto) {
-    this.isLogged();
+    this.verifyHasLogged();
 
     const { to, path, filename, subtitle } = data;
     const formattedNumber = this.handleNumber(to);
@@ -126,7 +124,7 @@ export class WhatsappService {
   }
 
   async sendImageMessage(data: SendMessageImageDto) {
-    this.isLogged();
+    this.verifyHasLogged();
 
     const { to, path, filename } = data;
     const formattedNumber = this.handleNumber(to);
@@ -141,7 +139,7 @@ export class WhatsappService {
   }
 
   async sendVoiceMessage(data: SendMessageVoiceDto) {
-    this.isLogged();
+    this.verifyHasLogged();
 
     const { to, path } = data;
     const formattedNumber = this.handleNumber(to);
@@ -152,7 +150,7 @@ export class WhatsappService {
   }
 
   async sendFileDocument(data: SendFileDocumentDto) {
-    this.isLogged();
+    this.verifyHasLogged();
 
     const { to, path, filename, subtitle } = data;
     const formattedNumber = this.handleNumber(to);
@@ -168,7 +166,7 @@ export class WhatsappService {
   }
 
   async getContactList() {
-    this.isLogged();
+    this.verifyHasLogged();
 
     const contacts = await this.client.getAllContacts();
 
@@ -176,7 +174,7 @@ export class WhatsappService {
   }
 
   async getContact(phoneNumber: string) {
-    this.isLogged();
+    this.verifyHasLogged();
 
     const formattedNumber = this.handleNumber(phoneNumber);
     const contact = await this.client.getContact(formattedNumber);
@@ -187,7 +185,7 @@ export class WhatsappService {
     const formattedNumber = `${number}@c.us`;
     return formattedNumber;
   }
-  private isLogged() {
+  private verifyHasLogged() {
     if (!this.client) throw new Error('Whatsapp desconectado');
   }
 }

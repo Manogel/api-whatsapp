@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.env
+.vscode
+.env.development
+.env.example
+.eslintrc.js
+.gitignore
+.prettierrc
+insomnia.json
+package-lock.json
+README.md

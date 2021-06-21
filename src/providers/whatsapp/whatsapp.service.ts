@@ -11,10 +11,11 @@ import {
 } from './dtos/SendMessageDto';
 import { SocketGateway } from '../socketio/socketio.gateway';
 import { EventTypes } from '../socketio/dto/eventType.dto';
+import { ReceiveMessageDto } from './dtos/ReceiveMessageDto';
 
 @Injectable()
 export class WhatsappService {
-  client: Whatsapp = undefined;
+  private client: Whatsapp = undefined;
   constructor(private readonly socketGateway: SocketGateway) {
     const appConfig = getAsyncAppConfig();
 
@@ -23,7 +24,7 @@ export class WhatsappService {
       logQR: true,
       catchQR: this.onWaitQrCode,
       statusFind: this.onGetStatus,
-      autoClose: 90000,
+      autoClose: 0,
     })
       .then((client) => {
         this.client = client;
@@ -53,15 +54,13 @@ export class WhatsappService {
       this.client.getWAVersion(),
     ]);
     const resp = {
-      data: {
-        status: {
-          mode: 'MAIN',
-          myNumber: response[0],
-          batteryLevel: response[1],
-          isPhoneConnected: response[2],
-          isLoggedIn: response[3],
-          waVersion: response[4],
-        },
+      status: {
+        mode: 'MAIN',
+        myNumber: this.handleNumberToDefaultFormat(response[0]),
+        batteryLevel: response[1],
+        isPhoneConnected: response[2],
+        isLoggedIn: response[3],
+        waVersion: response[4],
       },
     };
 
@@ -75,14 +74,71 @@ export class WhatsappService {
   };
 
   private onMessage(message: Message) {
-    this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, message);
+    if (
+      message.type === 'image' ||
+      message.type === 'document' ||
+      message.type === 'ptt' ||
+      message.type === 'audio' ||
+      message.type === 'video'
+    ) {
+      const formattedMessage: ReceiveMessageDto = {
+        id: message.id,
+        fromId: message.from,
+        quotedMessageId: message.quotedMsgObj,
+        // message.quotedMsgObj === null
+        //   ? message.quotedMsgObj
+        //   : message.quotedMsgObj.id,
+        message: {
+          isFromMe: message.fromMe,
+          text: message.body,
+          timestamp: message.timestamp.toString(),
+          type: message.type,
+          file: {
+            url: message.content,
+            name: message.filename,
+            mimetype: message.mimetype,
+            publicFilename: message.filename,
+            subtitle: message.caption,
+          },
+        },
+        from: {
+          id: message.sender.id,
+          name: message.sender.name,
+          alternativeName: message.sender.shortName,
+          number: this.handleNumberToDefaultFormat(message.from),
+        },
+      };
+      this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, formattedMessage);
+    } else {
+      const formattedMessage: ReceiveMessageDto = {
+        id: message.id,
+        fromId: message.from,
+        quotedMessageId: message.quotedMsgObj,
+        // message.quotedMsgObj === null
+        //   ? message.quotedMsgObj
+        //   : message.quotedMsgObj?.id,
+        message: {
+          isFromMe: message.fromMe,
+          text: message.body,
+          timestamp: message.timestamp.toString(),
+          type: message.type,
+        },
+        from: {
+          id: message.sender.id,
+          name: message.sender.name,
+          alternativeName: message.sender.shortName,
+          number: this.handleNumberToDefaultFormat(message.from),
+        },
+      };
+      this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, formattedMessage);
+    }
   }
 
   async sendTextMessage(data: SendMessageTextDto) {
     this.verifyHasLogged();
 
     const { to, message } = data;
-    const formattedNumber = this.handleNumber(to);
+    const formattedNumber = this.handleNumberToWhatsappFormat(to);
 
     const textMessage = await this.client.sendText(
       formattedNumber,
@@ -96,7 +152,7 @@ export class WhatsappService {
     this.verifyHasLogged();
 
     const { to, path, filename } = data;
-    const formattedNumber = this.handleNumber(to);
+    const formattedNumber = this.handleNumberToWhatsappFormat(to);
 
     const fileMessage = await this.client.sendFile(
       formattedNumber,
@@ -111,7 +167,7 @@ export class WhatsappService {
     this.verifyHasLogged();
 
     const { to, path, filename, subtitle } = data;
-    const formattedNumber = this.handleNumber(to);
+    const formattedNumber = this.handleNumberToWhatsappFormat(to);
 
     const videoMessage = await this.client.sendVideoAsGif(
       formattedNumber,
@@ -127,7 +183,7 @@ export class WhatsappService {
     this.verifyHasLogged();
 
     const { to, path, filename } = data;
-    const formattedNumber = this.handleNumber(to);
+    const formattedNumber = this.handleNumberToWhatsappFormat(to);
 
     const imageMessage = await this.client.sendImage(
       formattedNumber,
@@ -142,7 +198,7 @@ export class WhatsappService {
     this.verifyHasLogged();
 
     const { to, path } = data;
-    const formattedNumber = this.handleNumber(to);
+    const formattedNumber = this.handleNumberToWhatsappFormat(to);
 
     const voiceMessage = await this.client.sendVoice(formattedNumber, path);
 
@@ -153,7 +209,7 @@ export class WhatsappService {
     this.verifyHasLogged();
 
     const { to, path, filename, subtitle } = data;
-    const formattedNumber = this.handleNumber(to);
+    const formattedNumber = this.handleNumberToWhatsappFormat(to);
 
     const fileDocument = await this.client.sendFile(
       formattedNumber,
@@ -176,13 +232,17 @@ export class WhatsappService {
   async getContact(phoneNumber: string) {
     this.verifyHasLogged();
 
-    const formattedNumber = this.handleNumber(phoneNumber);
+    const formattedNumber = this.handleNumberToWhatsappFormat(phoneNumber);
     const contact = await this.client.getContact(formattedNumber);
     return contact;
   }
 
-  private handleNumber(number: string) {
+  private handleNumberToWhatsappFormat(number: string) {
     const formattedNumber = `${number}@c.us`;
+    return formattedNumber;
+  }
+  private handleNumberToDefaultFormat(number: string) {
+    const formattedNumber = number.split('@').shift();
     return formattedNumber;
   }
   private verifyHasLogged() {

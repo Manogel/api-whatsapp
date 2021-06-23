@@ -9,7 +9,9 @@ import { WhatsappConModule } from './modules/whatsappCon/whatasappCon.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     MulterModule.register(),
     SocketioModule,
     WhatsappModule,

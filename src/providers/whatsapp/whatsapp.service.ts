@@ -12,10 +12,14 @@ import {
 import { SocketGateway } from '../socketio/socketio.gateway';
 import { EventTypes } from '../socketio/dto/eventType.dto';
 import { ReceiveMessageDto } from './dtos/ReceiveMessageDto';
+import * as fs from 'fs';
+import { resolve } from 'path';
+import crypto from 'crypto';
 
 @Injectable()
 export class WhatsappService {
   private client: Whatsapp = undefined;
+  private appConfig = getAsyncAppConfig();
   constructor(private readonly socketGateway: SocketGateway) {
     const appConfig = getAsyncAppConfig();
 
@@ -54,14 +58,12 @@ export class WhatsappService {
       this.client.getWAVersion(),
     ]);
     const resp = {
-      status: {
-        mode: 'MAIN',
-        myNumber: this.handleNumberToDefaultFormat(response[0]),
-        batteryLevel: response[1],
-        isPhoneConnected: response[2],
-        isLoggedIn: response[3],
-        waVersion: response[4],
-      },
+      mode: 'MAIN',
+      myNumber: this.handleNumberToDefaultFormat(response[0]),
+      batteryLevel: response[1],
+      isPhoneConnected: response[2],
+      isLoggedIn: response[3],
+      waVersion: response[4],
     };
 
     return resp;
@@ -73,15 +75,11 @@ export class WhatsappService {
     return statusGet;
   };
 
-  private onMessage(message: Message) {
-    if (
-      message.type === 'image' ||
-      message.type === 'document' ||
-      message.type === 'ptt' ||
-      message.type === 'audio' ||
-      message.type === 'video'
-    ) {
-      const formattedMessage: ReceiveMessageDto = {
+  private async onMessage(message: Message) {
+    let formattedMessage: ReceiveMessageDto;
+    if (['image', 'document', 'ptt', 'audio', 'video'].includes(message.type)) {
+      const urlFile = await this.decriptFileSent(message);
+      formattedMessage = {
         id: message.id,
         fromId: message.from,
         quotedMessageId: message.quotedMsgObj,
@@ -94,7 +92,7 @@ export class WhatsappService {
           timestamp: message.timestamp.toString(),
           type: message.type,
           file: {
-            url: message.content,
+            url: urlFile,
             name: message.filename,
             mimetype: message.mimetype,
             publicFilename: message.filename,
@@ -110,7 +108,7 @@ export class WhatsappService {
       };
       this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, formattedMessage);
     } else {
-      const formattedMessage: ReceiveMessageDto = {
+      formattedMessage = {
         id: message.id,
         fromId: message.from,
         quotedMessageId: message.quotedMsgObj,
@@ -247,5 +245,21 @@ export class WhatsappService {
   }
   private verifyHasLogged() {
     if (!this.client) throw new Error('Whatsapp desconectado');
+  }
+
+  private async decriptFileSent(message: Message): Promise<string> {
+    const buffer = await this.client.decryptFile(message);
+
+    const filehash = crypto.randomBytes(10).toString('hex');
+    const filename = `${filehash}-${Date.now()}.${message.mimetype
+      .split('/')
+      .pop()}`;
+    const uploadsFolderPath = resolve(__dirname, '..', '..', '..', '..', 'tmp');
+    fs.writeFile(uploadsFolderPath + '/uploads/' + filename, buffer, (err) => {
+      if (err) {
+        throw new Error('Falha na decriptação do arquivo');
+      }
+    });
+    return `${this.appConfig.appURL}/files/${filename}`;
   }
 }

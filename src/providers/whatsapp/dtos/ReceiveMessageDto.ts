@@ -1,7 +1,7 @@
 export class ReceiveMessageDto {
   id: string;
   fromId: string;
-  quotedMessageId?: string | null;
+  quotedMessageId?: string;
   message: {
     isFromMe: boolean;
     text: string;

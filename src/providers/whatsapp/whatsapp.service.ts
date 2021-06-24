@@ -13,8 +13,8 @@ import { SocketGateway } from '../socketio/socketio.gateway';
 import { EventTypes } from '../socketio/dto/eventType.dto';
 import { ReceiveMessageDto } from './dtos/ReceiveMessageDto';
 import * as fs from 'fs';
-import { resolve } from 'path';
-import crypto from 'crypto';
+import uploadConfig from '@config/upload';
+import generateFilenameHash from '@utils/generateFilenameHash';
 
 @Injectable()
 export class WhatsappService {
@@ -76,60 +76,35 @@ export class WhatsappService {
   };
 
   private async onMessage(message: Message) {
-    let formattedMessage: ReceiveMessageDto;
+    const formattedMessage: ReceiveMessageDto = {
+      id: message.id,
+      fromId: message.from,
+      quotedMessageId: message.quotedMsgObj?.id,
+      message: {
+        isFromMe: message.fromMe,
+        text: message.body,
+        timestamp: message.timestamp.toString(),
+        type: message.type,
+      },
+      from: {
+        id: message.sender.id,
+        name: message.sender.name,
+        alternativeName: message.sender.shortName,
+        number: this.handleNumberToDefaultFormat(message.from),
+      },
+    };
     if (['image', 'document', 'ptt', 'audio', 'video'].includes(message.type)) {
       const urlFile = await this.decriptFileSent(message);
-      formattedMessage = {
-        id: message.id,
-        fromId: message.from,
-        quotedMessageId: message.quotedMsgObj,
-        // message.quotedMsgObj === null
-        //   ? message.quotedMsgObj
-        //   : message.quotedMsgObj.id,
-        message: {
-          isFromMe: message.fromMe,
-          text: message.body,
-          timestamp: message.timestamp.toString(),
-          type: message.type,
-          file: {
-            url: urlFile,
-            name: message.filename,
-            mimetype: message.mimetype,
-            publicFilename: message.filename,
-            subtitle: message.caption,
-          },
-        },
-        from: {
-          id: message.sender.id,
-          name: message.sender.name,
-          alternativeName: message.sender.shortName,
-          number: this.handleNumberToDefaultFormat(message.from),
-        },
+      formattedMessage.message.file = {
+        url: urlFile,
+        name: message.filename,
+        mimetype: message.mimetype,
+        publicFilename: message.filename,
+        subtitle: message.caption,
       };
-      this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, formattedMessage);
-    } else {
-      formattedMessage = {
-        id: message.id,
-        fromId: message.from,
-        quotedMessageId: message.quotedMsgObj,
-        // message.quotedMsgObj === null
-        //   ? message.quotedMsgObj
-        //   : message.quotedMsgObj?.id,
-        message: {
-          isFromMe: message.fromMe,
-          text: message.body,
-          timestamp: message.timestamp.toString(),
-          type: message.type,
-        },
-        from: {
-          id: message.sender.id,
-          name: message.sender.name,
-          alternativeName: message.sender.shortName,
-          number: this.handleNumberToDefaultFormat(message.from),
-        },
-      };
-      this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, formattedMessage);
     }
+
+    this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, formattedMessage);
   }
 
   async sendTextMessage(data: SendMessageTextDto) {
@@ -249,13 +224,12 @@ export class WhatsappService {
 
   private async decriptFileSent(message: Message): Promise<string> {
     const buffer = await this.client.decryptFile(message);
+    const uploadsFolderPath = uploadConfig.uploadsFolder;
 
-    const filehash = crypto.randomBytes(10).toString('hex');
-    const filename = `${filehash}-${Date.now()}.${message.mimetype
-      .split('/')
-      .pop()}`;
-    const uploadsFolderPath = resolve(__dirname, '..', '..', '..', '..', 'tmp');
-    fs.writeFile(uploadsFolderPath + '/uploads/' + filename, buffer, (err) => {
+    const fileExt = message.mimetype.split('/').pop();
+    const filename = generateFilenameHash(fileExt);
+
+    fs.writeFile(`${uploadsFolderPath}/${filename}`, buffer, (err) => {
       if (err) {
         throw new Error('Falha na decriptação do arquivo');
       }

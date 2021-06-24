@@ -1,20 +1,24 @@
-import crypto from 'crypto';
+import generateFilenameHash from '@utils/generateFilenameHash';
 import { diskStorage } from 'multer';
 import { resolve } from 'path';
 
-const uploadsFolderPath = resolve(__dirname, '..', '..', '..', 'tmp');
+const uploadsFolderPath = resolve(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  'tmp',
+  'uploads',
+);
 
 const uploadConfig = {
-  uploadsFolder: resolve(uploadsFolderPath, 'uploads'),
+  uploadsFolder: uploadsFolderPath,
   multer: {
     storage: diskStorage({
       destination: uploadsFolderPath,
       filename(_req, _file, cb) {
-        console.log(_file, 'aqui no multer');
-        const filehash = crypto.randomBytes(10).toString('hex');
         const ext = _file.originalname.split('.').pop();
-        const filename = `${filehash}-${Date.now()}.${ext}`;
-
+        const filename = generateFilenameHash(ext);
         return cb(null, filename);
       },
     }),

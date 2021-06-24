@@ -10,7 +10,6 @@ export class MessageService {
 
   async sendMessage(data: SendMessageRequestDto) {
     const { to, message } = data;
-
     const isFile = typeof message !== 'string';
 
     if (isFile) {
@@ -23,30 +22,44 @@ export class MessageService {
         filename: messageToFile.filename,
         subtitle: subtitle,
       };
+      let messageFile: any;
 
       const generalType = type.split('/').shift();
       switch (generalType) {
         case 'audio':
-          await this.whatsappService.sendVoiceMessage(formattedFile);
+          messageFile = await this.whatsappService.sendVoiceMessage(
+            formattedFile,
+          );
           break;
         case 'video':
-          await this.whatsappService.sendFileDocument(formattedFile);
+          messageFile = await await this.whatsappService.sendFileDocument(
+            formattedFile,
+          );
           break;
         case 'image':
-          await this.whatsappService.sendImageMessage(formattedFile);
+          messageFile = await await this.whatsappService.sendImageMessage(
+            formattedFile,
+          );
           break;
         case 'application':
-          await this.whatsappService.sendFileDocument(formattedFile);
+          messageFile = await await this.whatsappService.sendFileDocument(
+            formattedFile,
+          );
+
           break;
         default:
           break;
       }
+      return messageFile;
     } else {
       const formattedMessage: SendMessageDto = {
         message: message as string,
         to: to,
       };
-      await this.whatsappService.sendTextMessage(formattedMessage);
+      const messageText = await this.whatsappService.sendTextMessage(
+        formattedMessage,
+      );
+      return messageText;
     }
   }
 }

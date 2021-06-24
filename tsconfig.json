@@ -9,6 +9,8 @@
     "resolveJsonModule": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "strictNullChecks": false,
+    
     "rootDir": ".",
     "outDir": "./dist",
     "baseUrl": "./",

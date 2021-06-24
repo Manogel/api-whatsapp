@@ -1,5 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { StringOrObj, NotEmpty } from '@utils/class-validator/validators';
 
 export class SendMessageRequestDto {
   @ApiProperty({
@@ -26,6 +27,7 @@ export class SendMessageRequestDto {
     required: true,
     description: 'Exemplo:Uma mensagem de texto ou um caminho de um arquivo ',
   })
-  @IsNotEmpty()
+  @NotEmpty()
+  @StringOrObj()
   message: Express.Multer.File | string;
 }

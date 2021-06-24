@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "postinstall": "patch-package",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -30,14 +31,17 @@
     "@nestjs/swagger": "^4.8.0",
     "@nestjs/websockets": "^7.6.17",
     "body-parser": "^1.19.0",
+    "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
+    "dotenv": "^10.0.0",
     "file-type": "^16.5.0",
-    "mime-types": "^2.1.31",
+    "patch-package": "^6.4.7",
+    "postinstall-postinstall": "^2.1.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.6",
     "swagger-ui-express": "^4.1.6",
-    "venom-bot": "^3.0.15"
+    "venom-bot": "^3.0.18"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.6.0",

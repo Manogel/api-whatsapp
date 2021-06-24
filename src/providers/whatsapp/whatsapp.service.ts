@@ -12,7 +12,7 @@ import {
 import { SocketGateway } from '../socketio/socketio.gateway';
 import { EventTypes } from '../socketio/dto/eventType.dto';
 import { ReceiveMessageDto } from './dtos/ReceiveMessageDto';
-import * as fs from 'fs';
+import fs from 'fs';
 import uploadConfig from '@config/upload';
 import generateFilenameHash from '@utils/generateFilenameHash';
 

@@ -49,9 +49,8 @@ export class WhatsappService {
   };
 
   async showStatus() {
-    const getHostDevice = await this.client.getHostDevice();
     const response = await Promise.all([
-      getHostDevice.wid._serialized,
+      this.client.getHostDevice(),
       this.client.getBatteryLevel(),
       this.client.isConnected(),
       this.client.isLoggedIn(),
@@ -59,7 +58,7 @@ export class WhatsappService {
     ]);
     const resp = {
       mode: 'MAIN',
-      myNumber: this.handleNumberToDefaultFormat(response[0]),
+      myNumber: this.handleNumberToDefaultFormat(response[0].wid._serialized),
       batteryLevel: response[1],
       isPhoneConnected: response[2],
       isLoggedIn: response[3],

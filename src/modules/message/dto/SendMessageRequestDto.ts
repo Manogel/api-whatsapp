@@ -1,33 +1,22 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { StringOrObj, NotEmpty } from '@utils/class-validator/validators';
+import { IsString, IsNotEmpty, IsOptional, ValidateIf } from 'class-validator';
 
 export class SendMessageRequestDto {
-  @ApiProperty({
-    type: 'string',
-    required: true,
-    description: 'Exemplo:5596991215506',
-  })
   @IsNotEmpty()
   @IsString()
   to: string;
 
-  @ApiProperty({
-    type: 'string',
-    required: false,
-    description: 'Exemplo: descrição do arquivo',
-  })
+  @ValidateIf((o) => !!o.url)
   @IsOptional()
   @IsString()
-  subtitle?: string;
+  text?: string;
 
-  @ApiProperty({
-    type: 'string',
-    format: 'binary',
-    required: true,
-    description: 'Exemplo:Uma mensagem de texto ou um caminho de um arquivo ',
-  })
-  @NotEmpty()
-  @StringOrObj()
-  message: Express.Multer.File | string;
+  @ValidateIf((o) => !!o.text)
+  @IsOptional()
+  @IsString()
+  url?: string;
+
+  @ValidateIf((o) => !!o.text)
+  @IsOptional()
+  @IsString()
+  caption?: string;
 }

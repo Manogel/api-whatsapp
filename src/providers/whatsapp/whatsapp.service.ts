@@ -154,15 +154,10 @@ export class WhatsappService {
 
   async sendImageMessage(data: SendMessageImageDto) {
     this.verifyHasLogged();
-
-    const { to, path, filename } = data;
+    const { to, path } = data;
     const formattedNumber = this.handleNumberToWhatsappFormat(to);
 
-    const imageMessage = await this.client.sendImage(
-      formattedNumber,
-      path,
-      filename,
-    );
+    const imageMessage = await this.client.sendImage(formattedNumber, path);
 
     return imageMessage;
   }

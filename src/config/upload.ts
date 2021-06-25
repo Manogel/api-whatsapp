@@ -2,7 +2,7 @@ import generateFilenameHash from '@utils/generateFilenameHash';
 import { diskStorage } from 'multer';
 import { resolve } from 'path';
 
-const uploadsFolderPath = resolve(
+export const uploadsFolderPath = resolve(
   __dirname,
   '..',
   '..',

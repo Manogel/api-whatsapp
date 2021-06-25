@@ -22,17 +22,39 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+# Locally start
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Installation
+### 1. Installation
 
 ```bash
 $ npm install
 ```
 
-## Running the app
+### 2. Setup environment
+
+Copy `.env.example` to `.env` in root path and update environment variables
+
+### 3. Run prisma migration
+
+```bash
+$ npm run migration:deploy
+```
+
+### 4. Schema Development 🚨
+
+For any update in the Prisma schema `prisma/schema.prisma` execute this command:
+
+```bash
+$ npm run migration:create <migration-name>
+```
+
+You need execute to generate updated types:
+
+```bash
+$ npm run prisma:generate
+```
+
+### 5. Running the app
 
 ```bash
 # development
@@ -45,29 +67,26 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Test
+# Start with docker
+
+### 1. Installation
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+$ make build
 ```
 
-## Support
+### ⚠️ For each any updates in schema.prisma restart application with: ⚠️
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+$ make run
+```
 
-## Stay in touch
+### After build, for next executions use:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+$ make run
+```
 
-## License
+# Test
 
-Nest is [MIT licensed](LICENSE).
+in progress ...

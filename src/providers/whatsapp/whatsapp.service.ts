@@ -11,11 +11,15 @@ import {
 } from './dtos/SendMessageDto';
 import { SocketGateway } from '../socketio/socketio.gateway';
 import { EventTypes } from '../socketio/dto/eventType.dto';
+import { ReceiveMessageDto } from './dtos/ReceiveMessageDto';
+import fs from 'fs';
+import uploadConfig from '@config/upload';
+import generateFilenameHash from '@utils/generateFilenameHash';
 
 @Injectable()
 export class WhatsappService {
-  private client: Whatsapp;
-
+  private client: Whatsapp = undefined;
+  private appConfig = getAsyncAppConfig();
   constructor(private readonly socketGateway: SocketGateway) {
     const appConfig = getAsyncAppConfig();
 
@@ -24,10 +28,13 @@ export class WhatsappService {
     //   logQR: true,
     //   catchQR: this.onWaitQrCode,
     //   statusFind: this.onGetStatus,
+    //   autoClose: 0,
     // })
     //   .then((client) => {
     //     this.client = client;
-
+    //     this.client.onMessage((message) => {
+    //       this.onMessage(message);
+    //     });
     //     process.on('SIGINT', function () {
     //       client.close();
     //     });
@@ -37,103 +44,196 @@ export class WhatsappService {
     //   });
   }
 
-  onWaitQrCode: CatchQR = (qrCode) => {
-    this.socketGateway.broadcast(EventTypes.QR_CODE, qrCode);
+  private onWaitQrCode: CatchQR = (base64Qr) => {
+    this.socketGateway.broadcast(EventTypes.QR_CODE, base64Qr);
   };
 
-  onGetStatus: StatusFind = (statusGet) => {
-    this.socketGateway.broadcast(EventTypes.CONNECTION_STATUS, statusGet);
-  };
+  async showStatus() {
+    const getHostDevice = await this.client.getHostDevice();
+    const response = await Promise.all([
+      getHostDevice.wid._serialized,
+      this.client.getBatteryLevel(),
+      this.client.isConnected(),
+      this.client.isLoggedIn(),
+      this.client.getWAVersion(),
+    ]);
+    const resp = {
+      mode: 'MAIN',
+      myNumber: this.handleNumberToDefaultFormat(response[0]),
+      batteryLevel: response[1],
+      isPhoneConnected: response[2],
+      isLoggedIn: response[3],
+      waVersion: response[4],
+    };
 
-  async listenOnMessage() {
-    await this.client.onMessage(this.onMessage);
+    return resp;
   }
 
-  onMessage(message: Message) {
-    this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, message);
+  private onGetStatus: StatusFind = (statusGet) => {
+    this.socketGateway.broadcast(EventTypes.CONNECTION_STATUS, statusGet);
+
+    return statusGet;
+  };
+
+  private async onMessage(message: Message) {
+    const formattedMessage: ReceiveMessageDto = {
+      id: message.id,
+      fromId: message.from,
+      quotedMessageId: message.quotedMsgObj?.id,
+      message: {
+        isFromMe: message.fromMe,
+        text: message.body,
+        timestamp: message.timestamp.toString(),
+        type: message.type,
+      },
+      from: {
+        id: message.sender.id,
+        name: message.sender.name,
+        alternativeName: message.sender.shortName,
+        number: this.handleNumberToDefaultFormat(message.from),
+      },
+    };
+    if (['image', 'document', 'ptt', 'audio', 'video'].includes(message.type)) {
+      const urlFile = await this.decriptFileSent(message);
+      formattedMessage.message.file = {
+        url: urlFile,
+        name: message.filename,
+        mimetype: message.mimetype,
+        publicFilename: message.filename,
+        subtitle: message.caption,
+      };
+    }
+
+    this.socketGateway.broadcast(EventTypes.NEW_MESSAGE, formattedMessage);
   }
 
   async sendTextMessage(data: SendMessageTextDto) {
+    this.verifyHasLogged();
+
     const { to, message } = data;
-    const formattedNumber = this.handleNumber(to);
-    const response = await this.client.sendText(
+    const formattedNumber = this.handleNumberToWhatsappFormat(to);
+
+    const textMessage = await this.client.sendText(
       formattedNumber,
       message as string,
     );
 
-    return response;
+    return textMessage;
   }
 
   async sendFileMessage(data: SendMessageFileDto) {
+    this.verifyHasLogged();
+
     const { to, path, filename } = data;
-    const formattedNumber = this.handleNumber(to);
-    const response = await this.client.sendFile(
+    const formattedNumber = this.handleNumberToWhatsappFormat(to);
+
+    const fileMessage = await this.client.sendFile(
       formattedNumber,
       path,
       filename,
     );
 
-    return response;
+    return fileMessage;
   }
 
   async sendVideoMessage(data: SendMessageVideoAsGifDto) {
+    this.verifyHasLogged();
+
     const { to, path, filename, subtitle } = data;
-    const formattedNumber = this.handleNumber(to);
-    const response = await this.client.sendVideoAsGif(
+    const formattedNumber = this.handleNumberToWhatsappFormat(to);
+
+    const videoMessage = await this.client.sendVideoAsGif(
       formattedNumber,
       path,
       filename,
       subtitle,
     );
 
-    return response;
+    return videoMessage;
   }
 
   async sendImageMessage(data: SendMessageImageDto) {
+    this.verifyHasLogged();
+
     const { to, path, filename } = data;
-    const formattedNumber = this.handleNumber(to);
-    const response = await this.client.sendImage(
+    const formattedNumber = this.handleNumberToWhatsappFormat(to);
+
+    const imageMessage = await this.client.sendImage(
       formattedNumber,
       path,
       filename,
     );
 
-    return response;
+    return imageMessage;
   }
 
   async sendVoiceMessage(data: SendMessageVoiceDto) {
-    const { to, path } = data;
-    const formattedNumber = this.handleNumber(to);
-    const response = await this.client.sendVoice(formattedNumber, path);
+    this.verifyHasLogged();
 
-    return response;
+    const { to, path } = data;
+    const formattedNumber = this.handleNumberToWhatsappFormat(to);
+
+    const voiceMessage = await this.client.sendVoice(formattedNumber, path);
+
+    return voiceMessage;
   }
 
   async sendFileDocument(data: SendFileDocumentDto) {
+    this.verifyHasLogged();
+
     const { to, path, filename, subtitle } = data;
-    const formattedNumber = this.handleNumber(to);
-    const response = await this.client.sendFile(
+    const formattedNumber = this.handleNumberToWhatsappFormat(to);
+
+    const fileDocument = await this.client.sendFile(
       formattedNumber,
       path,
       filename,
       subtitle,
     );
 
-    return response;
+    return fileDocument;
   }
+
   async getContactList() {
+    this.verifyHasLogged();
+
     const contacts = await this.client.getAllContacts();
+
     return contacts;
   }
 
   async getContact(phoneNumber: string) {
-    const formattedNumber = this.handleNumber(phoneNumber);
+    this.verifyHasLogged();
+
+    const formattedNumber = this.handleNumberToWhatsappFormat(phoneNumber);
     const contact = await this.client.getContact(formattedNumber);
     return contact;
   }
 
-  private handleNumber(number: string) {
+  private handleNumberToWhatsappFormat(number: string) {
     const formattedNumber = `${number}@c.us`;
     return formattedNumber;
+  }
+  private handleNumberToDefaultFormat(number: string) {
+    const formattedNumber = number.split('@').shift();
+    return formattedNumber;
+  }
+  private verifyHasLogged() {
+    if (!this.client) throw new Error('Whatsapp desconectado');
+  }
+
+  private async decriptFileSent(message: Message): Promise<string> {
+    const buffer = await this.client.decryptFile(message);
+    const uploadsFolderPath = uploadConfig.uploadsFolder;
+
+    const fileExt = message.mimetype.split('/').pop();
+    const filename = generateFilenameHash(fileExt);
+
+    fs.writeFile(`${uploadsFolderPath}/${filename}`, buffer, (err) => {
+      if (err) {
+        throw new Error('Falha na decriptação do arquivo');
+      }
+    });
+    return `${this.appConfig.appURL}/files/${filename}`;
   }
 }

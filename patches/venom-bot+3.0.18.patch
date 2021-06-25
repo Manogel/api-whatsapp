@@ -1,0 +1,13 @@
+diff --git a/node_modules/venom-bot/dist/api/model/message.d.ts b/node_modules/venom-bot/dist/api/model/message.d.ts
+index 0036b35..592f2f9 100644
+--- a/node_modules/venom-bot/dist/api/model/message.d.ts
++++ b/node_modules/venom-bot/dist/api/model/message.d.ts
+@@ -76,7 +76,7 @@ export interface Message {
+      */
+     lastSeen: null | number | boolean;
+     chatId: string;
+-    quotedMsgObj: null;
++    quotedMsgObj?: Message;
+     mediaData: MediaData;
+ }
+ export interface Sender {

@@ -32,3 +32,41 @@ model Contact {
 
   @@map("contacts")
 }
+
+model BotMessage {
+  id          String  @id @db.VarChar(200)
+  title       String  @db.VarChar(100)
+  message     String  @db.Text
+  isEntryFlow Boolean @default(false)
+  isFinalFlow Boolean @default(false)
+  extendsData Json
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  botMessageFlowSource            BotMessageFlow[] @relation("BotMessageFlowSource")
+  botMessageFlowTarget            BotMessageFlow[] @relation("BotMessageFlowTarget")
+  botMessageFlowIfAnswerIsInvalid BotMessageFlow[] @relation("BotMessageFlowIfAnswerIsInvalid")
+  @@map("bot_messages")
+}
+
+model BotMessageFlow {
+  id                             String  @id
+  sourceMessageId                String  @db.VarChar(200)
+  targetMessageId                String  @db.VarChar(200)
+  mustBeEqualTo                  String  @db.VarChar(200)
+  messageIfAnswerIsInvalidId     String? @db.VarChar(200)
+  customMessageIfAnswerIsInvalid String? @db.Text
+  extendsData                    Json
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  sourceMessage            BotMessage  @relation("BotMessageFlowSource", fields: [sourceMessageId], references: [id])
+  targetMessage            BotMessage  @relation("BotMessageFlowTarget", fields: [targetMessageId], references: [id])
+  messageIfAnswerIsInvalid BotMessage? @relation("BotMessageFlowIfAnswerIsInvalid", fields: [messageIfAnswerIsInvalidId], references: [id])
+
+  @@map("bot_message_flow")
+}

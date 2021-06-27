@@ -14,3 +14,40 @@ Table Contact {
   updatedAt DateTime [not null]
   deletedAt DateTime
 }
+
+Table BotMessage {
+  id String [pk]
+  title String
+  message String [not null]
+  isEntryFlow Boolean [not null, default: false]
+  isFinalFlow Boolean [not null, default: false]
+  extendsData Json [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  botMessageFlowSource BotMessageFlow [not null]
+  botMessageFlowTarget BotMessageFlow [not null]
+  botMessageFlowIfAnswerIsInvalid BotMessageFlow [not null]
+}
+
+Table BotMessageFlow {
+  id String [pk]
+  sourceMessageId String [not null]
+  targetMessageId String [not null]
+  mustBeEqualTo String [not null]
+  messageIfAnswerIsInvalidId String
+  customMessageIfAnswerIsInvalid String
+  extendsData Json [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  sourceMessage BotMessage [not null]
+  targetMessage BotMessage [not null]
+  messageIfAnswerIsInvalid BotMessage
+}
+
+Ref: BotMessageFlow.sourceMessageId > BotMessage.id
+
+Ref: BotMessageFlow.targetMessageId > BotMessage.id
+
+Ref: BotMessageFlow.messageIfAnswerIsInvalidId > BotMessage.id

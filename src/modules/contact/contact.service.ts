@@ -7,6 +7,7 @@ import { CreateContactDto } from './dtos/CreateContact.dto';
 @Injectable()
 export class ContactService {
   constructor(
+    // TODO - change to whatsAppProvider
     private readonly whatsAppService: WhatsappService,
     private readonly contactRepo: ContactRepository,
   ) {}

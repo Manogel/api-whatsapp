@@ -7,6 +7,7 @@ import { MessageModule } from './modules/message/message.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { WhatsappConModule } from './modules/whatsappCon/whatasappCon.module';
 import { PrismaModule } from './providers/prisma/prisma.module';
+import { ChatbotFlowModule } from './modules/chatbot-flow/chatbot-flow.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PrismaModule } from './providers/prisma/prisma.module';
     ContactModule,
     WhatsappConModule,
     PrismaModule,
+    ChatbotFlowModule,
   ],
 })
 export class AppModule {}

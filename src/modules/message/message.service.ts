@@ -7,6 +7,7 @@ import fs from 'fs';
 import { uploadsFolderPath } from '@config/upload';
 import mime from 'mime';
 import axios from 'axios';
+import ffmpeg from 'ffmpeg';
 
 @Injectable()
 export class MessageService {
@@ -33,17 +34,48 @@ export class MessageService {
         });
         const filename = url.split('/files/').pop();
         const file = fs.createWriteStream(`${uploadsFolderPath}/${filename}`);
-        const mimeType = mime.lookup(`${uploadsFolderPath}/${filename}`);
+
         response.data.pipe(file);
+
         return new Promise((resolve, reject) => {
           file.on('finish', async () => {
-            const formattedFile: SendMessageFileDto = {
-              path: `${uploadsFolderPath}/${filename}`,
-              to: to,
-              filename: filename,
-              subtitle: caption,
-            };
+            let formattedFile: SendMessageFileDto;
+            let mimeType;
+
+            if (filename.split('-').pop() === 'audio.webm') {
+              const newFilename = `${filename.split('.').shift()}.mp3`;
+              try {
+                var process = await new ffmpeg(
+                  `${uploadsFolderPath}/${filename}`,
+                );
+
+                const response = await process.fnExtractSoundToMP3(
+                  `${uploadsFolderPath}/${newFilename}`,
+                );
+              } catch (e) {
+                console.log(e.code);
+                console.log(e.msg);
+                throw new Error('Falha na conversão para mp3');
+              }
+              formattedFile = {
+                path: `${uploadsFolderPath}/${newFilename}`,
+                to: to,
+                filename: newFilename,
+                subtitle: caption,
+              };
+              mimeType = mime.lookup(`${uploadsFolderPath}/${newFilename}`);
+            } else {
+              formattedFile = {
+                path: `${uploadsFolderPath}/${filename}`,
+                to: to,
+                filename: filename,
+                subtitle: caption,
+              };
+              mimeType = mime.lookup(`${uploadsFolderPath}/${filename}`);
+            }
+
             const generalType = mimeType.split('/').shift();
+
             switch (generalType) {
               case 'audio':
                 messageFile = await this.whatsappService.sendVoiceMessage(

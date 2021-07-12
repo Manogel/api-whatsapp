@@ -88,8 +88,8 @@ export class WhatsappService {
       },
       from: {
         id: message.sender.id,
-        name: message.sender.name,
-        alternativeName: message.sender.shortName,
+        name: message.sender.name || message.sender.pushname,
+        alternativeName: message.sender.shortName || message.sender.pushname,
         number: this.handleNumberToDefaultFormat(message.from),
       },
     };
@@ -154,15 +154,10 @@ export class WhatsappService {
 
   async sendImageMessage(data: SendMessageImageDto) {
     this.verifyHasLogged();
-
-    const { to, path, filename } = data;
+    const { to, path } = data;
     const formattedNumber = this.handleNumberToWhatsappFormat(to);
 
-    const imageMessage = await this.client.sendImage(
-      formattedNumber,
-      path,
-      filename,
-    );
+    const imageMessage = await this.client.sendImage(formattedNumber, path);
 
     return imageMessage;
   }
